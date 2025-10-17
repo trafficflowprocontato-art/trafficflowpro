@@ -85,9 +85,8 @@ export default function DashboardScreen() {
   
   const filteredSummary = getFilteredSummary();
   const filteredPaidClients = selectedMonth === "total" 
-    ? filteredPaidClients 
+    ? clients.filter((c) => c.paymentStatus === "paid").length
     : clients.filter(c => c.lastPaymentMonth === selectedMonth).length;
-  const filteredPaidClients = clients.filter((c) => c.paymentStatus === "paid").length;
   const pendingClients = clients.filter((c) => c.paymentStatus === "pending").length;
   const overdueClients = clients.filter((c) => c.paymentStatus === "overdue").length;
 
