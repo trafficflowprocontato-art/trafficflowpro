@@ -18,6 +18,14 @@ export default function RegisterScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
+  // Validações de senha
+  const hasMinLength = password.length >= 6;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+  const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasSpecialChar;
+
   const handleRegister = async () => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
@@ -37,8 +45,12 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
     
-    if (password.length < 6) {
-      Alert.alert("Senha fraca", "A senha deve ter no mínimo 6 caracteres");
+    // Validação robusta de senha
+    if (!isPasswordValid) {
+      Alert.alert(
+        "Senha não atende os requisitos", 
+        "Sua senha deve conter:\n• Pelo menos 6 caracteres\n• Uma letra maiúscula\n• Uma letra minúscula\n• Um caractere especial (!@#$%^&*...)"
+      );
       return;
     }
 
@@ -187,7 +199,7 @@ export default function RegisterScreen({ navigation }: any) {
                   <TextInput
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Crie uma senha segura"
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     editable={!loading}
@@ -198,6 +210,57 @@ export default function RegisterScreen({ navigation }: any) {
                     <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={22} color="#6b7280" />
                   </Pressable>
                 </View>
+                
+                {/* Indicadores de requisitos de senha */}
+                {password.length > 0 && (
+                  <View className="mt-3 bg-gray-50 rounded-xl p-3">
+                    <Text className="text-xs font-semibold text-gray-700 mb-2">Requisitos da senha:</Text>
+                    
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons 
+                        name={hasMinLength ? "checkmark-circle" : "close-circle"} 
+                        size={16} 
+                        color={hasMinLength ? "#22c55e" : "#ef4444"} 
+                      />
+                      <Text className={`ml-2 text-xs ${hasMinLength ? "text-green-600" : "text-red-500"}`}>
+                        Mínimo 6 caracteres
+                      </Text>
+                    </View>
+                    
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons 
+                        name={hasUppercase ? "checkmark-circle" : "close-circle"} 
+                        size={16} 
+                        color={hasUppercase ? "#22c55e" : "#ef4444"} 
+                      />
+                      <Text className={`ml-2 text-xs ${hasUppercase ? "text-green-600" : "text-red-500"}`}>
+                        Uma letra maiúscula (A-Z)
+                      </Text>
+                    </View>
+                    
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons 
+                        name={hasLowercase ? "checkmark-circle" : "close-circle"} 
+                        size={16} 
+                        color={hasLowercase ? "#22c55e" : "#ef4444"} 
+                      />
+                      <Text className={`ml-2 text-xs ${hasLowercase ? "text-green-600" : "text-red-500"}`}>
+                        Uma letra minúscula (a-z)
+                      </Text>
+                    </View>
+                    
+                    <View className="flex-row items-center">
+                      <Ionicons 
+                        name={hasSpecialChar ? "checkmark-circle" : "close-circle"} 
+                        size={16} 
+                        color={hasSpecialChar ? "#22c55e" : "#ef4444"} 
+                      />
+                      <Text className={`ml-2 text-xs ${hasSpecialChar ? "text-green-600" : "text-red-500"}`}>
+                        Um caractere especial (!@#$%...)
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
 
               <View className="mb-6">
