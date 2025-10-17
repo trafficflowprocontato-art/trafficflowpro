@@ -26,6 +26,14 @@ export default function RegisterScreen({ navigation }: any) {
   
   const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasSpecialChar;
 
+  // Validação de email em tempo real
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email.trim());
+
+  // Validação de email em tempo real
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email.trim());
+
   const handleRegister = async () => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
@@ -40,8 +48,17 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
 
-    if (!trimmedEmail.includes("@")) {
-      Alert.alert("Email inválido", "Digite um email válido");
+    // Validação robusta de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Alert.alert("Email inválido", "Digite um email válido no formato: seuemail@exemplo.com");
+      return;
+    }
+    
+    // Verificar domínio
+    const domain = trimmedEmail.split('@')[1];
+    if (!domain || domain.length < 3 || !domain.includes('.')) {
+      Alert.alert("Email inválido", "O domínio do email não é válido");
       return;
     }
     
@@ -147,7 +164,7 @@ export default function RegisterScreen({ navigation }: any) {
           <View className="flex-1 px-6">
             {/* Banner de versão atualizada */}
             <View className="bg-purple-600 rounded-2xl p-3 mb-3">
-              <Text className="text-white text-center font-bold text-sm">🔒 v2.4 - DEBUG ATIVO 🔍</Text>
+              <Text className="text-white text-center font-bold text-sm">🔒 v2.5 - VALIDAÇÃO TOTAL ✓</Text>
             </View>
             
             <View className="bg-green-500 rounded-2xl p-4 mb-6">
@@ -194,6 +211,20 @@ export default function RegisterScreen({ navigation }: any) {
                     className="flex-1 py-4 px-3 text-base text-gray-900"
                     placeholderTextColor="#9ca3af"
                   />
+                  {email.length > 0 && (
+                    <Ionicons 
+                      name={isEmailValid ? "checkmark-circle" : "close-circle"} 
+                      size={22} 
+                      color={isEmailValid ? "#22c55e" : "#ef4444"} 
+                    />
+                  )}
+                  {email.length > 0 && (
+                    <Ionicons 
+                      name={isEmailValid ? "checkmark-circle" : "close-circle"} 
+                      size={22} 
+                      color={isEmailValid ? "#22c55e" : "#ef4444"} 
+                    />
+                  )}
                 </View>
               </View>
 
