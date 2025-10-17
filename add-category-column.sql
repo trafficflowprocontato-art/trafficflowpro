@@ -1,0 +1,1 @@
+ALTER TABLE agency_expenses ADD COLUMN IF NOT EXISTS category TEXT DEFAULT Geral
