@@ -44,8 +44,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   
   register: async (email: string, password: string, name: string) => {
     try {
+      console.log("🟢 [authStore] register chamado:", { email, name });
+      
       // Validações
       if (!email || !password || !name) {
+        console.log("❌ [authStore] Campos vazios");
         return { success: false, error: "Preencha todos os campos" };
       }
       
@@ -73,14 +76,18 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         return { success: false, error: "Email inválido" };
       }
       
+      console.log("🔵 [authStore] Chamando signUp...");
       // Registrar no Supabase
       const { data, error } = await signUp(email, password, name);
+      
+      console.log("🔵 [authStore] Resultado signUp:", { data: !!data, error: error?.message });
       
       if (error) {
         throw error;
       }
       
       if (data?.user) {
+        console.log("✅ [authStore] Usuário criado, atualizando estado...");
         const user = {
           id: data.user.id,
           email: data.user.email!,
@@ -99,11 +106,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         // Carregar dados financeiros do Supabase
         useFinancialStore.getState().setUserId(user.id);
         await useFinancialStore.getState().loadData();
+        
+        console.log("✅ [authStore] Registro completo!");
       }
       
       return { success: true };
     } catch (error: any) {
-      console.error("Erro no registro:", error);
+      console.error("❌ [authStore] Erro no registro:", error);
       let errorMessage = "Erro ao registrar usuário";
       
       if (error.message?.includes("already registered")) {
