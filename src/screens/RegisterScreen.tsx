@@ -30,9 +30,6 @@ export default function RegisterScreen({ navigation }: any) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailValid = emailRegex.test(email.trim());
 
-  // Validação de email em tempo real
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isEmailValid = emailRegex.test(email.trim());
 
   const handleRegister = async () => {
     const trimmedName = name.trim();
@@ -48,10 +45,7 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
 
-    // Validação robusta de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      Alert.alert("Email inválido", "Digite um email válido no formato: seuemail@exemplo.com");
       return;
     }
     
