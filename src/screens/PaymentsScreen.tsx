@@ -80,9 +80,6 @@ export default function PaymentsScreen({ navigation }: any) {
       paid: all.filter(c => c.realStatus === "paid").length,
     };
   }, [clients]);
-      paid: all.filter(c => c.realStatus === "paid").length,
-    };
-  }, [clients]);
 
   const handleMarkAsPaid = (client: Client & { realStatus: string }) => {
     const today = new Date();
