@@ -54,7 +54,7 @@ export default function PaymentsScreen({ navigation }: any) {
         ...client,
         realStatus: getClientStatus(client)
       }))
-      .filter(client => {
+      .filter((client): client is Client & { realStatus: "paid" | "pending" | "overdue" } => {
         // Não mostrar clientes que ainda não começaram a ser cobrados
         if (client.realStatus === null) return false;
         
@@ -81,7 +81,7 @@ export default function PaymentsScreen({ navigation }: any) {
     };
   }, [clients]);
 
-  const handleMarkAsPaid = (client: Client & { realStatus: string }) => {
+  const handleMarkAsPaid = (client: Client & { realStatus: "paid" | "pending" | "overdue" }) => {
     const today = new Date();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     

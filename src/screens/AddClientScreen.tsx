@@ -38,6 +38,8 @@ export default function AddClientScreen() {
   const [firstPaymentMonth, setFirstPaymentMonth] = useState("");
   const [newExpenseDesc, setNewExpenseDesc] = useState("");
   const [newExpenseValue, setNewExpenseValue] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   // Função para converter data BR (DD/MM/AAAA) para ISO (AAAA-MM-DD)
   const convertBRDateToISO = (brDate: string): string => {
@@ -172,34 +174,78 @@ export default function AddClientScreen() {
   };
 
   const handleSave = () => {
-    if (!name.trim() || !monthlyValue || !paymentDate) {
+    console.log("🔵 handleSave chamado");
+    setValidationError("");
+    
+    // Validação
+    if (!name.trim()) {
+      setValidationError("Nome do cliente é obrigatório");
+      console.log("❌ Erro: Nome vazio");
+      return;
+    }
+    
+    if (!monthlyValue) {
+      setValidationError("Valor mensal é obrigatório");
+      console.log("❌ Erro: Valor mensal vazio");
+      return;
+    }
+    
+    if (!paymentDate) {
+      setValidationError("Dia de vencimento é obrigatório");
+      console.log("❌ Erro: Dia de vencimento vazio");
       return;
     }
 
-    // Se não tiver vendedor, comissão é 0
-    const commission = sellerCommission ? parseFloat(sellerCommission) : 0;
-    const seller = sellerName.trim() || "Sem vendedor";
-
-    const clientData: Client = {
-      id: editingClient?.id || Date.now().toString(),
-      name: name.trim(),
-      monthlyValue: parseFloat(monthlyValue),
-      paymentDate: parseInt(paymentDate),
-      paymentStatus,
-      sellerCommission: commission,
-      sellerName: seller,
-      extraExpenses,
-      contractStartDate: convertBRDateToISO(contractStartDate) || undefined,
-      firstPaymentMonth: convertMonthYearToISO(firstPaymentMonth) || undefined,
-    };
-
-    if (isEditing) {
-      updateClient(clientData.id, clientData);
-    } else {
-      addClient(clientData);
+    const paymentDay = parseInt(paymentDate);
+    if (isNaN(paymentDay) || paymentDay < 1 || paymentDay > 31) {
+      setValidationError("Dia de vencimento deve ser entre 1 e 31");
+      console.log("❌ Erro: Dia de vencimento inválido");
+      return;
     }
 
-    navigation.goBack();
+    console.log("✅ Validação passou");
+    setIsSaving(true);
+
+    try {
+      // Se não tiver vendedor, comissão é 0
+      const commission = sellerCommission ? parseFloat(sellerCommission) : 0;
+      const seller = sellerName.trim() || "Sem vendedor";
+
+      const clientData: Client = {
+        id: editingClient?.id || Date.now().toString(),
+        name: name.trim(),
+        monthlyValue: parseFloat(monthlyValue),
+        paymentDate: paymentDay,
+        paymentStatus,
+        sellerCommission: commission,
+        sellerName: seller,
+        extraExpenses,
+        contractStartDate: convertBRDateToISO(contractStartDate) || undefined,
+        firstPaymentMonth: convertMonthYearToISO(firstPaymentMonth) || undefined,
+      };
+
+      console.log("🔵 Dados do cliente:", clientData);
+
+      if (isEditing) {
+        console.log("🔵 Atualizando cliente...");
+        updateClient(clientData.id, clientData);
+      } else {
+        console.log("🔵 Adicionando cliente...");
+        addClient(clientData);
+      }
+
+      console.log("✅ Cliente salvo, voltando...");
+      
+      // Pequeno delay para garantir que o estado foi atualizado
+      setTimeout(() => {
+        setIsSaving(false);
+        navigation.goBack();
+      }, 100);
+    } catch (error) {
+      console.error("❌ Erro ao salvar cliente:", error);
+      setValidationError("Erro ao salvar cliente. Tente novamente.");
+      setIsSaving(false);
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -247,6 +293,14 @@ export default function AddClientScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View className="px-6 py-6">
+              {/* Validation Error */}
+              {validationError ? (
+                <View className="bg-red-100 border border-red-400 rounded-xl p-4 mb-5 flex-row items-start">
+                  <Ionicons name="alert-circle" size={20} color="#dc2626" style={{ marginTop: 2 }} />
+                  <Text className="text-red-700 ml-2 flex-1">{validationError}</Text>
+                </View>
+              ) : null}
+
               {/* Name Input */}
               <View className="mb-5">
                 <Text className="text-gray-700 font-medium mb-2">
@@ -497,10 +551,17 @@ export default function AddClientScreen() {
           >
             <Pressable
               onPress={handleSave}
-              className="bg-blue-500 py-4 rounded-2xl items-center active:bg-blue-600"
+              disabled={isSaving}
+              className={`py-4 rounded-2xl items-center ${
+                isSaving ? "bg-blue-300" : "bg-blue-500 active:bg-blue-600"
+              }`}
+              style={Platform.OS === 'web' ? { cursor: 'pointer' as any } : undefined}
             >
               <Text className="text-white font-bold text-base">
-                {isEditing ? "Salvar Alterações" : "Adicionar Cliente"}
+                {isSaving 
+                  ? "Salvando..." 
+                  : (isEditing ? "Salvar Alterações" : "Adicionar Cliente")
+                }
               </Text>
             </Pressable>
           </View>
