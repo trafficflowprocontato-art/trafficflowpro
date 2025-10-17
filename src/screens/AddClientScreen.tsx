@@ -108,8 +108,11 @@ export default function AddClientScreen() {
       }
     }
     
-    setter(formatted);
-  };
+
+  useEffect(() => {
+    if (editingClient) {
+      setName(editingClient.name);
+      setMonthlyValue(editingClient.monthlyValue.toString());
       setPaymentDate(editingClient.paymentDate.toString());
       setPaymentStatus(editingClient.paymentStatus);
       setSellerCommission(editingClient.sellerCommission.toString());
