@@ -111,7 +111,6 @@ export default function AddClientScreen() {
       contractStartDate: contractStartDate || undefined,
       firstPaymentMonth: firstPaymentMonth || undefined,
     };
-    };
 
     if (isEditing) {
       updateClient(clientData.id, clientData);
