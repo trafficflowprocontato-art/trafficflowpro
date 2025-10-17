@@ -167,11 +167,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       } else if (error.message) {
         errorMessage = error.message;
       }
-      } else if (error.message?.includes("User already registered")) {
-        errorMessage = "Este email já está cadastrado. Tente fazer login.";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
       
       return { success: false, error: errorMessage };
     }
