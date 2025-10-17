@@ -25,6 +25,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleRegister = async () => {
     // Validações
@@ -38,14 +39,36 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
     
-    setLoading(true);
-    const result = await register(email.trim(), password, name.trim());
-    setLoading(false);
-    
-    if (!result.success) {
-      Alert.alert("Erro no Cadastro", result.error || "Erro desconhecido");
+    if (password.length < 6) {
+      Alert.alert("Erro", "A senha deve ter no mínimo 6 caracteres");
+      return;
     }
-    // Se sucesso, a navegação será automática pelo AppNavigator
+    
+    console.log("🔵 Iniciando registro...");
+    setLoading(true);
+    setError(""); // Limpar erro anterior
+    
+    try {
+      const result = await register(email.trim(), password, name.trim());
+      console.log("🔵 Resultado do registro:", result);
+      
+      if (!result.success) {
+        console.error("❌ Erro no registro:", result.error);
+        const errorMessage = result.error || "Erro desconhecido. Tente novamente.";
+        setError(errorMessage);
+        Alert.alert("Erro no Cadastro", errorMessage);
+      } else {
+        console.log("✅ Registro bem-sucedido!");
+        // Se sucesso, a navegação será automática pelo AppNavigator
+      }
+    } catch (error: any) {
+      console.error("❌ Erro crítico no registro:", error);
+      const errorMessage = "Ocorreu um erro ao criar a conta. Verifique sua conexão e tente novamente.";
+      setError(errorMessage);
+      Alert.alert("Erro", errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,6 +112,18 @@ export default function RegisterScreen({ navigation }: any) {
                 Preencha seus dados para começar
               </Text>
             </View>
+
+            {/* Error Banner */}
+            {error ? (
+              <View className="bg-red-50 border-2 border-red-300 rounded-2xl p-4 mb-6">
+                <View className="flex-row items-center">
+                  <Ionicons name="alert-circle" size={24} color="#dc2626" />
+                  <Text className="text-red-800 font-medium ml-2 flex-1">
+                    {error}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
 
             {/* Register Form */}
             <View className="mb-8">

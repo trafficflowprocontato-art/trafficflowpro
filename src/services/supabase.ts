@@ -6,9 +6,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 2. Crie um projeto grátis
 // 3. Vá em Settings > API
 // 4. Copie a URL e a anon key
+// 5. Crie um arquivo .env na raiz do projeto com essas variáveis
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'SUA_URL_AQUI';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'SUA_ANON_KEY_AQUI';
+
+// Verificar se as credenciais estão configuradas
+if (SUPABASE_URL === 'SUA_URL_AQUI' || SUPABASE_ANON_KEY === 'SUA_ANON_KEY_AQUI') {
+  console.error('⚠️ ATENÇÃO: Credenciais do Supabase não configuradas!');
+  console.error('📝 Crie um arquivo .env na raiz com:');
+  console.error('   EXPO_PUBLIC_SUPABASE_URL=sua_url');
+  console.error('   EXPO_PUBLIC_SUPABASE_ANON_KEY=sua_key');
+}
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -149,6 +158,11 @@ export interface Database {
 // Funções de autenticação
 export async function signUp(email: string, password: string, name: string) {
   try {
+    // Verificar se está configurado
+    if (SUPABASE_URL === 'SUA_URL_AQUI' || SUPABASE_ANON_KEY === 'SUA_ANON_KEY_AQUI') {
+      throw new Error('Supabase não configurado. Por favor, configure as credenciais no arquivo .env');
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
