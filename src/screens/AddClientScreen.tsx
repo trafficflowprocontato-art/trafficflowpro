@@ -68,9 +68,9 @@ export default function AddClientScreen() {
       setSellerCommission(editingClient.sellerCommission.toString());
       setSellerName(editingClient.sellerName || "");
       setExtraExpenses(editingClient.extraExpenses);
-    }
       setContractStartDate(editingClient.contractStartDate || "");
       setFirstPaymentMonth(editingClient.firstPaymentMonth || "");
+    }
   }, [editingClient]);
 
   const handleAddExtraExpense = () => {
