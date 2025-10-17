@@ -19,6 +19,7 @@ export default function DashboardScreen() {
   const logout = useAuthStore((s) => s.logout);
   const trialInfo = useAuthStore((s) => s.trialInfo);
   const calculateTrialInfo = useAuthStore((s) => s.calculateTrialInfo);
+  const [selectedMonth, setSelectedMonth] = React.useState<string>("total"); // "total" ou "2025-10"
   
   // Calcular trial info ao montar componente
   React.useEffect(() => {
@@ -26,7 +27,67 @@ export default function DashboardScreen() {
   }, [calculateTrialInfo]);
   
   const summary = getFinancialSummary();
-  const paidClients = clients.filter((c) => c.paymentStatus === "paid").length;
+  
+  // Gerar lista de meses disponíveis
+  const getAvailableMonths = () => {
+    const months = [];
+    const today = new Date();
+    
+    // Últimos 12 meses
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthLabel = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      months.push({ key: monthKey, label: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1) });
+    }
+    
+    return months;
+  };
+  
+  const availableMonths = getAvailableMonths();
+  
+  // Calcular summary filtrado por mês
+  const getFilteredSummary = () => {
+    if (selectedMonth === "total") {
+      return getFinancialSummary();
+    }
+    
+    // Filtrar clientes que pagaram no mês selecionado
+    const monthClients = clients.filter(c => c.lastPaymentMonth === selectedMonth);
+    
+    // Calcular receita do mês
+    const totalRevenue = monthClients.reduce((sum, c) => sum + c.monthlyValue, 0);
+    
+    // Despesas extras dos clientes do mês
+    const totalExtraExpenses = monthClients.reduce((sum, c) => {
+      return sum + c.extraExpenses.reduce((expSum, exp) => expSum + exp.value, 0);
+    }, 0);
+    
+    // Comissões do mês
+    const monthCommissions = sellerCommissions.filter(sc => sc.month === selectedMonth);
+    const totalCommissions = monthCommissions.reduce((sum, sc) => sum + sc.commissionValue, 0);
+    
+    // Despesas da agência (todas, pois não temos filtro por mês ainda)
+    const totalAgencyExpenses = summary.totalAgencyExpenses;
+    
+    const totalExpenses = totalCommissions + totalExtraExpenses + totalAgencyExpenses;
+    const netProfit = totalRevenue - totalExpenses;
+    
+    return {
+      totalRevenue,
+      totalExpenses,
+      totalCommissions,
+      totalExtraExpenses,
+      totalAgencyExpenses,
+      netProfit,
+    };
+  };
+  
+  const filteredSummary = getFilteredSummary();
+  const filteredPaidClients = selectedMonth === "total" 
+    ? filteredPaidClients 
+    : clients.filter(c => c.lastPaymentMonth === selectedMonth).length;
+  const filteredPaidClients = clients.filter((c) => c.paymentStatus === "paid").length;
   const pendingClients = clients.filter((c) => c.paymentStatus === "pending").length;
   const overdueClients = clients.filter((c) => c.paymentStatus === "overdue").length;
 
@@ -36,10 +97,10 @@ export default function DashboardScreen() {
     agencyExpenses: agencyExpenses.length,
     sellerCommissions: sellerCommissions.length,
     paidCommissions: sellerCommissions.filter((c) => c.paymentStatus === "paid").length,
-    totalCommissions: summary.totalCommissions,
+    totalCommissions: filteredSummary.totalCommissions,
     totalAgencyExpenses: summary.totalAgencyExpenses,
-    totalRevenue: summary.totalRevenue,
-    totalExpenses: summary.totalExpenses,
+    totalRevenue: filteredSummary.totalRevenue,
+    totalExpenses: filteredSummary.totalExpenses,
   });
 
   const formatCurrency = (value: number) => {
@@ -98,6 +159,36 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* Seletor de Mês */}
+        <View className="bg-white border-b border-gray-100 px-8 py-4">
+          <View className="max-w-7xl mx-auto w-full">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row gap-2">
+                <Pressable
+                  onPress={() => setSelectedMonth("total")}
+                  className={`px-4 py-2 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : "bg-gray-100"}`}
+                >
+                  <Text className={`font-semibold ${selectedMonth === "total" ? "text-white" : "text-gray-700"}`}>
+                    📊 Total (Tudo)
+                  </Text>
+                </Pressable>
+                
+                {availableMonths.map(month => (
+                  <Pressable
+                    key={month.key}
+                    onPress={() => setSelectedMonth(month.key)}
+                    className={`px-4 py-2 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : "bg-gray-100"}`}
+                  >
+                    <Text className={`font-semibold ${selectedMonth === month.key ? "text-white" : "text-gray-700"}`}>
+                      {month.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+
         <View className="max-w-7xl mx-auto w-full px-8 py-8">
           {/* Trial Banner Desktop */}
           {trialInfo && !trialInfo.hasFullAccess && (
@@ -151,10 +242,10 @@ export default function DashboardScreen() {
                 <Text className="text-gray-600 text-sm font-semibold">LUCRO LÍQUIDO</Text>
               </View>
               <Text className="text-green-500 text-4xl font-bold mb-2">
-                {formatCurrency(summary.netProfit)}
+                {formatCurrency(filteredSummary.netProfit)}
               </Text>
               <Text className="text-gray-500 text-sm">
-                Receita: {formatCurrency(summary.totalRevenue)}
+                Receita: {formatCurrency(filteredSummary.totalRevenue)}
               </Text>
             </View>
 
@@ -167,7 +258,7 @@ export default function DashboardScreen() {
                 <Text className="text-gray-600 text-sm font-semibold">RECEITA TOTAL</Text>
               </View>
               <Text className="text-blue-600 text-4xl font-bold mb-2">
-                {formatCurrency(summary.totalRevenue)}
+                {formatCurrency(filteredSummary.totalRevenue)}
               </Text>
               <Text className="text-gray-500 text-sm">
                 {clients.length} {clients.length === 1 ? "cliente" : "clientes"}
@@ -183,7 +274,7 @@ export default function DashboardScreen() {
                 <Text className="text-gray-600 text-sm font-semibold">DESPESAS TOTAIS</Text>
               </View>
               <Text className="text-red-500 text-4xl font-bold mb-2">
-                {formatCurrency(summary.totalExpenses)}
+                {formatCurrency(filteredSummary.totalExpenses)}
               </Text>
               <Text className="text-gray-500 text-sm">
                 Comissões + Despesas
@@ -200,7 +291,7 @@ export default function DashboardScreen() {
                   <Ionicons name="checkmark-circle" size={24} color="#10b981" />
                   <Text className="text-green-700 font-semibold ml-2">PAGOS</Text>
                 </View>
-                <Text className="text-green-900 text-5xl font-bold">{paidClients}</Text>
+                <Text className="text-green-900 text-5xl font-bold">{filteredPaidClients}</Text>
               </View>
 
               <View className="flex-1 bg-yellow-50 rounded-2xl p-6 border-2 border-yellow-200">
@@ -235,7 +326,7 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Receita Total</Text>
                   </View>
-                  <Text className="text-green-600 text-xl font-bold">{formatCurrency(summary.totalRevenue)}</Text>
+                  <Text className="text-green-600 text-xl font-bold">{formatCurrency(filteredSummary.totalRevenue)}</Text>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
@@ -245,7 +336,7 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Comissões</Text>
                   </View>
-                  <Text className="text-orange-600 text-xl font-bold">-{formatCurrency(summary.totalCommissions)}</Text>
+                  <Text className="text-orange-600 text-xl font-bold">-{formatCurrency(filteredSummary.totalCommissions)}</Text>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
@@ -275,14 +366,14 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Total de Despesas</Text>
                   </View>
-                  <Text className="text-red-600 text-xl font-bold">-{formatCurrency(summary.totalExpenses)}</Text>
+                  <Text className="text-red-600 text-xl font-bold">-{formatCurrency(filteredSummary.totalExpenses)}</Text>
                 </View>
               </View>
 
               <View className="bg-green-50 rounded-xl p-6 mt-6 border-2 border-green-200">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-gray-700 text-lg font-bold">Lucro Líquido</Text>
-                  <Text className="text-green-600 text-3xl font-bold">{formatCurrency(summary.netProfit)}</Text>
+                  <Text className="text-green-600 text-3xl font-bold">{formatCurrency(filteredSummary.netProfit)}</Text>
                 </View>
               </View>
             </View>
@@ -397,10 +488,39 @@ export default function DashboardScreen() {
             </Text>
           </View>
           <Text className="text-green-500 text-4xl font-bold">
-            {formatCurrency(summary.netProfit)}
+            {formatCurrency(filteredSummary.netProfit)}
           </Text>
           <Text className="text-blue-600 text-sm mt-2">
-            Receita total: {formatCurrency(summary.totalRevenue)}
+
+        {/* Seletor de Mês Mobile */}
+        <View className="mb-6">
+          <Text className="text-gray-700 font-semibold mb-3 text-sm">Filtrar por período:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={() => setSelectedMonth("total")}
+                className={`px-4 py-3 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : "bg-white border border-gray-300"}`}
+              >
+                <Text className={`font-semibold text-sm ${selectedMonth === "total" ? "text-white" : "text-gray-700"}`}>
+                  📊 Total
+                </Text>
+              </Pressable>
+              
+              {availableMonths.slice(-6).map(month => (
+                <Pressable
+                  key={month.key}
+                  onPress={() => setSelectedMonth(month.key)}
+                  className={`px-4 py-3 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : "bg-white border border-gray-300"}`}
+                >
+                  <Text className={`font-semibold text-sm ${selectedMonth === month.key ? "text-white" : "text-gray-700"}`}>
+                    {month.label.split(' ')[0]}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+            Receita total: {formatCurrency(filteredSummary.totalRevenue)}
           </Text>
         </View>
 
@@ -415,7 +535,7 @@ export default function DashboardScreen() {
                 <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
                 <Text className="text-green-700 text-xs font-medium">PAGOS</Text>
               </View>
-              <Text className="text-green-900 text-2xl font-bold">{paidClients}</Text>
+              <Text className="text-green-900 text-2xl font-bold">{filteredPaidClients}</Text>
             </View>
             
             <View className="flex-1 bg-yellow-50 rounded-2xl p-4 border border-yellow-100">
@@ -457,7 +577,7 @@ export default function DashboardScreen() {
               Comissões Totais: {sellerCommissions.length} | Pagas: {sellerCommissions.filter((c) => c.paymentStatus === "paid").length}
             </Text>
             <Text className="text-gray-600 text-xs">
-              Total Comissões Pagas: {formatCurrency(summary.totalCommissions)}
+              Total Comissões Pagas: {formatCurrency(filteredSummary.totalCommissions)}
             </Text>
           </View>
           
@@ -470,7 +590,7 @@ export default function DashboardScreen() {
               <Text className="text-gray-700 font-medium">Receita Total</Text>
             </View>
             <Text className="text-green-600 font-semibold text-base">
-              {formatCurrency(summary.totalRevenue)}
+              {formatCurrency(filteredSummary.totalRevenue)}
             </Text>
           </View>
 
@@ -483,7 +603,7 @@ export default function DashboardScreen() {
               <Text className="text-gray-700 font-medium">Comissões</Text>
             </View>
             <Text className="text-orange-600 font-semibold text-base">
-              -{formatCurrency(summary.totalCommissions)}
+              -{formatCurrency(filteredSummary.totalCommissions)}
             </Text>
           </View>
 
@@ -522,7 +642,7 @@ export default function DashboardScreen() {
               <Text className="text-gray-700 font-medium">Total de Despesas</Text>
             </View>
             <Text className="text-red-600 font-semibold text-base">
-              -{formatCurrency(summary.totalExpenses)}
+              -{formatCurrency(filteredSummary.totalExpenses)}
             </Text>
           </View>
 
@@ -531,9 +651,9 @@ export default function DashboardScreen() {
             <Text className="text-gray-900 font-bold text-base">Lucro Líquido</Text>
             <Text 
               className="font-bold text-lg"
-              style={{ color: summary.netProfit >= 0 ? "#22c55e" : "#ef4444" }}
+              style={{ color: filteredSummary.netProfit >= 0 ? "#22c55e" : "#ef4444" }}
             >
-              {formatCurrency(summary.netProfit)}
+              {formatCurrency(filteredSummary.netProfit)}
             </Text>
           </View>
         </View>
