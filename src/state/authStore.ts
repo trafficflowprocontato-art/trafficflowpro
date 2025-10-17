@@ -72,8 +72,16 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         return { success: false, error: "A senha deve ter no mínimo 6 caracteres" };
       }
 
-      if (!email.includes("@") || !email.includes(".")) {
-        return { success: false, error: "Email inválido" };
+      // Validação de email mais robusta
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return { success: false, error: "Email inválido. Verifique o formato do email." };
+      }
+      
+      // Verificar se o domínio é válido
+      const domain = email.split('@')[1];
+      if (!domain || domain.length < 3) {
+        return { success: false, error: "Domínio de email inválido" };
       }
       
       console.log("🔵 [authStore] Chamando signUp...");
@@ -134,10 +142,20 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       console.error("❌ [authStore] Erro no registro:", error);
       let errorMessage = "Erro ao registrar usuário";
       
+      
       if (error.message?.includes("already registered")) {
         errorMessage = "Este email já está cadastrado";
       } else if (error.message?.includes("email address is too long")) {
         errorMessage = "Email muito longo. Use um email válido.";
+      } else if (error.message?.includes("is invalid")) {
+        errorMessage = "Email inválido. Verifique se digitou corretamente e tente novamente.";
+      } else if (error.message?.includes("User already registered")) {
+        errorMessage = "Este email já está cadastrado. Tente fazer login.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      } else if (error.message?.includes("User already registered")) {
+        errorMessage = "Este email já está cadastrado. Tente fazer login.";
       } else if (error.message) {
         errorMessage = error.message;
       }
