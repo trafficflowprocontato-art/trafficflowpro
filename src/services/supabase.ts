@@ -158,11 +158,14 @@ export interface Database {
 // Funções de autenticação
 export async function signUp(email: string, password: string, name: string) {
   try {
+    console.log('🔵 signUp chamado:', { email, name });
+    
     // Verificar se está configurado
     if (SUPABASE_URL === 'SUA_URL_AQUI' || SUPABASE_ANON_KEY === 'SUA_ANON_KEY_AQUI') {
       throw new Error('Supabase não configurado. Por favor, configure as credenciais no arquivo .env');
     }
 
+    console.log('🔵 Chamando supabase.auth.signUp...');
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -173,24 +176,43 @@ export async function signUp(email: string, password: string, name: string) {
       },
     });
 
-    if (error) throw error;
+    console.log('🔵 Resultado auth.signUp:', { data, error });
+
+    if (error) {
+      console.error('❌ Erro no auth.signUp:', error);
+      throw error;
+    }
 
     // Criar registro na tabela users
     if (data.user) {
-      const { error: profileError } = await supabase
+      console.log('🔵 Usuário criado no auth, inserindo na tabela users...', {
+        id: data.user.id,
+        email: data.user.email,
+        name
+      });
+      
+      const { data: insertData, error: profileError } = await supabase
         .from('users')
         .insert({
           id: data.user.id,
           email: data.user.email!,
           name,
-        });
+        })
+        .select();
 
-      if (profileError) throw profileError;
+      console.log('🔵 Resultado insert users:', { insertData, profileError });
+
+      if (profileError) {
+        console.error('❌ Erro ao inserir na tabela users:', profileError);
+        throw profileError;
+      }
+      
+      console.log('✅ Usuário criado com sucesso na tabela users!');
     }
 
     return { data, error: null };
   } catch (error: any) {
-    console.error('Erro no registro:', error);
+    console.error('❌ Erro no registro:', error);
     return { data: null, error };
   }
 }
