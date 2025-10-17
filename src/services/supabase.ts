@@ -183,33 +183,8 @@ export async function signUp(email: string, password: string, name: string) {
       throw error;
     }
 
-    // Criar registro na tabela users
-    if (data.user) {
-      console.log('🔵 Usuário criado no auth, inserindo na tabela users...', {
-        id: data.user.id,
-        email: data.user.email,
-        name
-      });
-      
-      const { data: insertData, error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email: data.user.email!,
-          name,
-        })
-        .select();
-
-      console.log('🔵 Resultado insert users:', { insertData, profileError });
-
-      if (profileError) {
-        console.error('❌ Erro ao inserir na tabela users:', profileError);
-        throw profileError;
-      }
-      
-      console.log('✅ Usuário criado com sucesso na tabela users!');
-    }
-
+    console.log('✅ Usuário criado com sucesso no auth!');
+    
     return { data, error: null };
   } catch (error: any) {
     console.error('❌ Erro no registro:', error);
@@ -226,39 +201,14 @@ export async function signIn(email: string, password: string) {
 
     if (error) throw error;
 
-    // Buscar dados do perfil
+    // Usar dados do user_metadata em vez da tabela users
     if (data.user) {
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-
-      // Se o perfil não existe, criar automaticamente
-      if (profileError && profileError.code === 'PGRST116') {
-        console.log('Perfil não encontrado, criando automaticamente...');
-        
-        const userName = data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário';
-        
-        const { data: newProfile, error: createError } = await supabase
-          .from('users')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            name: userName,
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Erro ao criar perfil:', createError);
-          throw createError;
-        }
-
-        return { data: { ...data, profile: newProfile }, error: null };
-      }
-
-      if (profileError) throw profileError;
+      const profile = {
+        id: data.user.id,
+        email: data.user.email!,
+        name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
+        created_at: data.user.created_at
+      };
 
       return { data: { ...data, profile }, error: null };
     }
