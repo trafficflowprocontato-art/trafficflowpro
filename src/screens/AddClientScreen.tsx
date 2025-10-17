@@ -323,18 +323,6 @@ export default function AddClientScreen() {
                   </Text>
                 )}
               </View>
-                  <Text className="text-orange-600 text-xs mt-2">
-                    💡 Dica: Se fechou em 10/2025, normalmente o 1º pagamento é 11/2025
-                  </Text>
-                )}
-              </View>
-                />
-                {contractStartDate && !firstPaymentMonth && (
-                  <Text className="text-orange-600 text-xs mt-2">
-                    💡 Dica: Se fechou em 2025-10, normalmente o 1º pagamento é 2025-11
-                  </Text>
-                )}
-              </View>
 
               {/* Payment Status */}
               <View className="mb-5">
