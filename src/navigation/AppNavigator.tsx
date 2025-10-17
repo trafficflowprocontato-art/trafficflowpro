@@ -129,12 +129,12 @@ function AppStack() {
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen
         name="AddClient"
-      <Stack.Screen name="Payments" component={PaymentsScreen} />
         component={AddClientScreen}
         options={{
           presentation: "modal",
         }}
       />
+      <Stack.Screen name="Payments" component={PaymentsScreen} />
     </Stack.Navigator>
   );
 }
