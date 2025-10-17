@@ -87,25 +87,44 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       }
       
       if (data?.user) {
-        console.log("✅ [authStore] Usuário criado, atualizando estado...");
-        const user = {
-          id: data.user.id,
-          email: data.user.email!,
-          name,
-          created_at: data.user.created_at,
-        };
+        console.log("✅ [authStore] Usuário criado com sucesso!");
         
-        set({
-          user,
-          isAuthenticated: true,
-        });
+        // IMPORTANTE: Verificar se o email precisa ser confirmado
+        const emailConfirmed = data.user.email_confirmed_at !== null;
         
-        // Calcular trial info
-        get().calculateTrialInfo();
-        
-        // Carregar dados financeiros do Supabase
-        useFinancialStore.getState().setUserId(user.id);
-        await useFinancialStore.getState().loadData();
+        if (emailConfirmed) {
+          // Email já confirmado (improvável em novo cadastro)
+          console.log("✅ Email já confirmado, logando usuário...");
+          const user = {
+            id: data.user.id,
+            email: data.user.email!,
+            name,
+            created_at: data.user.created_at,
+          };
+          
+          set({
+            user,
+            isAuthenticated: true,
+          });
+          
+          // Calcular trial info
+          get().calculateTrialInfo();
+          
+          // Carregar dados financeiros do Supabase
+          useFinancialStore.getState().setUserId(user.id);
+          await useFinancialStore.getState().loadData();
+        } else {
+          // Email não confirmado - NÃO logar, apenas retornar sucesso
+          console.log("📧 Email não confirmado - usuário deve confirmar antes de logar");
+          
+          // Fazer logout para garantir que não fica logado
+          await signOut();
+          
+          set({
+            user: null,
+            isAuthenticated: false,
+          });
+        }
         
         console.log("✅ [authStore] Registro completo!");
       }
