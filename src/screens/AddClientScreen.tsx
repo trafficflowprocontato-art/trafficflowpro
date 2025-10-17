@@ -39,6 +39,34 @@ export default function AddClientScreen() {
   const [newExpenseDesc, setNewExpenseDesc] = useState("");
   const [newExpenseValue, setNewExpenseValue] = useState("");
 
+  // Função para converter data BR (DD/MM/AAAA) para ISO (AAAA-MM-DD)
+  const convertBRDateToISO = (brDate: string): string => {
+    if (!brDate || brDate.length !== 10) return "";
+    const [day, month, year] = brDate.split("/");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Função para converter data ISO (AAAA-MM-DD) para BR (DD/MM/AAAA)
+  const convertISODateToBR = (isoDate: string): string => {
+    if (!isoDate) return "";
+    const [year, month, day] = isoDate.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
+  // Função para converter mês/ano BR (MM/AAAA) para ISO (AAAA-MM)
+  const convertMonthYearToISO = (brMonth: string): string => {
+    if (!brMonth || brMonth.length !== 7) return "";
+    const [month, year] = brMonth.split("/");
+    return `${year}-${month}`;
+  };
+
+  // Função para converter mês/ano ISO (AAAA-MM) para BR (MM/AAAA)
+  const convertISOMonthToBR = (isoMonth: string): string => {
+    if (!isoMonth) return "";
+    const [year, month] = isoMonth.split("-");
+    return `${month}/${year}`;
+  };
+
   // Função para permitir apenas números e pontos/vírgulas
   const handleNumericInput = (text: string, setter: (value: string) => void) => {
     // Remove tudo que não é número, ponto ou vírgula
@@ -57,6 +85,7 @@ export default function AddClientScreen() {
     if (cleaned === '' || (num >= 1 && num <= 31)) {
       setter(cleaned);
     }
+  };
 
   // Função para formatar data no padrão brasileiro (DD/MM/AAAA)
   const handleDateInput = (text: string, setter: (value: string) => void) => {
@@ -108,6 +137,8 @@ export default function AddClientScreen() {
       }
     }
     
+    setter(formatted);
+  };
 
   useEffect(() => {
     if (editingClient) {
@@ -157,9 +188,9 @@ export default function AddClientScreen() {
       paymentStatus,
       sellerCommission: commission,
       sellerName: seller,
+      extraExpenses,
       contractStartDate: convertBRDateToISO(contractStartDate) || undefined,
       firstPaymentMonth: convertMonthYearToISO(firstPaymentMonth) || undefined,
-      firstPaymentMonth: firstPaymentMonth || undefined,
     };
 
     if (isEditing) {
