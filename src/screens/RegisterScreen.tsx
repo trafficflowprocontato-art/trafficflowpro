@@ -16,55 +16,43 @@ export default function RegisterScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleRegister = async () => {
-    console.log("🟢 [RegisterScreen] Botão clicado!");
-    
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
     
-    console.log("🟢 [RegisterScreen] Dados:", { trimmedName, trimmedEmail, password: "***" });
-    
     if (!trimmedName || !trimmedEmail || !password || !confirmPassword) {
-      console.log("❌ [RegisterScreen] Campos vazios");
       Alert.alert("Campos obrigatórios", "Preencha todos os campos");
       return;
     }
 
     if (trimmedName.length < 2) {
-      console.log("❌ [RegisterScreen] Nome muito curto");
       Alert.alert("Nome inválido", "O nome deve ter no mínimo 2 caracteres");
       return;
     }
 
     if (!trimmedEmail.includes("@")) {
-      console.log("❌ [RegisterScreen] Email inválido");
       Alert.alert("Email inválido", "Digite um email válido");
       return;
     }
     
     if (password.length < 6) {
-      console.log("❌ [RegisterScreen] Senha muito curta");
       Alert.alert("Senha fraca", "A senha deve ter no mínimo 6 caracteres");
       return;
     }
 
     if (password !== confirmPassword) {
-      console.log("❌ [RegisterScreen] Senhas diferentes");
       Alert.alert("Senhas diferentes", "As senhas não coincidem");
       return;
     }
     
-    console.log("🔵 [RegisterScreen] Chamando register...");
     setLoading(true);
     
     try {
       const result = await register(trimmedEmail, password, trimmedName);
       
-      console.log("🔵 [RegisterScreen] Resultado:", result);
-      
       if (!result.success) {
-        console.error("❌ [RegisterScreen] Erro:", result.error);
         let errorMsg = result.error || "Erro ao criar conta";
         
         if (errorMsg.includes("already")) {
@@ -73,18 +61,69 @@ export default function RegisterScreen({ navigation }: any) {
         
         Alert.alert("Erro ao criar conta", errorMsg);
       } else {
-        console.log("✅ [RegisterScreen] Sucesso! Conta criada!");
-        Alert.alert("Sucesso!", "Conta criada com sucesso! Redirecionando...");
+        // Sucesso - mostrar tela de confirmação de email
+        setEmailSent(true);
       }
     } catch (error: any) {
-      console.error("❌ [RegisterScreen] Erro crítico:", error);
       Alert.alert("Erro", "Não foi possível criar sua conta. Tente novamente.");
     } finally {
       setLoading(false);
-      console.log("🔵 [RegisterScreen] Loading finalizado");
     }
   };
 
+  // Tela de confirmação de email
+  if (emailSent) {
+    return (
+      <WebContainer maxWidth={500}>
+        <View className="flex-1 bg-gray-50 justify-center px-6" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+          <View className="bg-white rounded-3xl p-8 shadow-lg">
+            <View className="items-center mb-6">
+              <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-4">
+                <Ionicons name="mail" size={40} color="#22c55e" />
+              </View>
+              <Text className="text-2xl font-bold text-gray-900 text-center mb-2">
+                Verifique seu email
+              </Text>
+              <Text className="text-base text-gray-600 text-center">
+                Enviamos um link de confirmação para
+              </Text>
+              <Text className="text-base font-semibold text-blue-600 text-center mt-1">
+                {email}
+              </Text>
+            </View>
+
+            <View className="bg-blue-50 rounded-xl p-4 mb-6">
+              <Text className="text-sm text-gray-700 text-center">
+                Clique no link no email para ativar sua conta e fazer login.
+              </Text>
+            </View>
+
+            <View className="space-y-3">
+              <Text className="text-sm text-gray-600 text-center">
+                Não recebeu o email?
+              </Text>
+              <Text className="text-xs text-gray-500 text-center">
+                • Verifique a caixa de spam{"\n"}
+                • Aguarde alguns minutos{"\n"}
+                • Verifique se digitou o email correto
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() => navigation.goBack()}
+              className="mt-6 py-4 bg-blue-600 rounded-xl"
+            >
+              <Text className="text-white font-bold text-center">
+                Voltar para o login
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </WebContainer>
+    );
+  }
+
+  // Tela de registro
   return (
     <WebContainer maxWidth={500}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-gray-50">

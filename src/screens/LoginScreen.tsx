@@ -24,14 +24,30 @@ export default function LoginScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Campos obrigatórios", "Preencha email e senha");
+      return;
+    }
+
     setLoading(true);
     const result = await login(email.trim(), password);
     setLoading(false);
     
     if (!result.success) {
-      Alert.alert("Erro no Login", result.error || "Erro desconhecido");
+      let errorMessage = result.error || "Erro ao fazer login";
+      
+      // Mensagem específica para email não confirmado
+      if (errorMessage.includes("Email not confirmed") || errorMessage.includes("not confirmed")) {
+        Alert.alert(
+          "Email não confirmado", 
+          "Por favor, verifique sua caixa de entrada e clique no link de confirmação que enviamos para o seu email."
+        );
+      } else if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("Invalid")) {
+        Alert.alert("Erro no Login", "Email ou senha incorretos");
+      } else {
+        Alert.alert("Erro no Login", errorMessage);
+      }
     }
-    // Se sucesso, a navegação será automática pelo AppNavigator
   };
 
   return (
