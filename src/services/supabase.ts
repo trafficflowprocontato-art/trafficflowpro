@@ -71,8 +71,20 @@ export async function signUp(email: string, password: string, name: string) {
 
 export async function signIn(email: string, password: string) {
   try {
+    console.log('🔵 [supabase] signIn chamado para:', email);
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    
+    if (error) {
+      console.error('❌ [supabase] Erro no signIn:', error.message, error.status);
+      throw error;
+    }
+
+    if (!data.user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    console.log('✅ [supabase] Login bem-sucedido para:', data.user.email);
 
     const profile = {
       id: data.user.id,
@@ -83,6 +95,7 @@ export async function signIn(email: string, password: string) {
 
     return { data: { ...data, profile }, error: null };
   } catch (error: any) {
+    console.error('❌ [supabase] Erro capturado no signIn:', error);
     return { data: null, error };
   }
 }
@@ -119,6 +132,27 @@ export async function resetPassword(email: string) {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     return { error };
   } catch (error: any) {
+    return { error };
+  }
+}
+
+export async function resendConfirmationEmail(email: string) {
+  try {
+    console.log('🔵 [supabase] Reenviando email de confirmação para:', email);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    });
+    
+    if (error) {
+      console.error('❌ [supabase] Erro ao reenviar email:', error);
+      return { error };
+    }
+    
+    console.log('✅ [supabase] Email reenviado com sucesso');
+    return { error: null };
+  } catch (error: any) {
+    console.error('❌ [supabase] Erro ao reenviar email:', error);
     return { error };
   }
 }

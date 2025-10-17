@@ -7,12 +7,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../state/authStore";
 import WebContainer from "../components/WebContainer";
+import { resendConfirmationEmail } from "../services/supabase";
 
 export default function LoginScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -22,10 +22,51 @@ export default function LoginScreen({ navigation }: any) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [debugMode, setDebugMode] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const [showResendButton, setShowResendButton] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleLogoTap = () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    
+    if (newCount >= 5) {
+      setDebugMode(!debugMode);
+      setTapCount(0);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      setErrorMessage("Digite seu email para reenviar a confirmação");
+      return;
+    }
+
+    setResendingEmail(true);
+    const { error } = await resendConfirmationEmail(email.trim());
+    setResendingEmail(false);
+
+    if (error) {
+      setErrorMessage("Erro ao reenviar email: " + error.message);
+      setSuccessMessage("");
+    } else {
+      setErrorMessage("");
+      setShowResendButton(false);
+      setSuccessMessage("Email de confirmação reenviado! Verifique sua caixa de entrada.");
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(""), 5000);
+    }
+  };
 
   const handleLogin = async () => {
+    setErrorMessage("");
+    
     if (!email || !password) {
-      Alert.alert("Campos obrigatórios", "Preencha email e senha");
+      setErrorMessage("Preencha email e senha");
       return;
     }
 
@@ -34,18 +75,20 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(false);
     
     if (!result.success) {
-      let errorMessage = result.error || "Erro ao fazer login";
+      let message = result.error || "Erro ao fazer login";
       
-      // Mensagem específica para email não confirmado
-      if (errorMessage.includes("Email not confirmed") || errorMessage.includes("not confirmed")) {
-        Alert.alert(
-          "Email não confirmado", 
-          "Por favor, verifique sua caixa de entrada e clique no link de confirmação que enviamos para o seu email."
-        );
-      } else if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("Invalid")) {
-        Alert.alert("Erro no Login", "Email ou senha incorretos");
+      // Mensagens mais específicas e amigáveis
+      if (message.includes("Email not confirmed") || message.includes("not confirmed")) {
+        setErrorMessage("Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login.");
+        setShowResendButton(true);
+      } else if (message.includes("Invalid login credentials") || message.includes("Invalid")) {
+        setShowResendButton(false);
+        setErrorMessage(debugMode 
+          ? `Credenciais inválidas. Detalhes: ${message}`
+          : "Email ou senha incorretos. Verifique suas credenciais e tente novamente.");
       } else {
-        Alert.alert("Erro no Login", errorMessage);
+        setShowResendButton(false);
+        setErrorMessage(message);
       }
     }
   };
@@ -77,15 +120,22 @@ export default function LoginScreen({ navigation }: any) {
             
             {/* Logo/Header */}
             <View className="items-center mb-10">
-              <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center mb-4">
-                <Ionicons name="bar-chart" size={40} color="white" />
-              </View>
+              <Pressable onPress={handleLogoTap}>
+                <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center mb-4">
+                  <Ionicons name="bar-chart" size={40} color="white" />
+                </View>
+              </Pressable>
               <Text className="text-3xl font-bold text-gray-900 mb-2">
                 TrafficFlow Pro
               </Text>
               <Text className="text-base text-gray-500">
                 Gestão Financeira para Agências
               </Text>
+              {debugMode ? (
+                <Text className="text-xs text-orange-500 mt-2">
+                  🐛 Modo Debug Ativado
+                </Text>
+              ) : null}
             </View>
 
             {/* Login Form */}
@@ -93,6 +143,42 @@ export default function LoginScreen({ navigation }: any) {
               <Text className="text-2xl font-bold text-gray-900 mb-6">
                 Entrar
               </Text>
+
+              {/* Success Message */}
+              {successMessage ? (
+                <View className="bg-green-100 border border-green-400 rounded-xl p-4 mb-4 flex-row items-start">
+                  <Ionicons name="checkmark-circle" size={20} color="#16a34a" style={{ marginTop: 2 }} />
+                  <Text className="text-green-700 ml-2 flex-1">{successMessage}</Text>
+                </View>
+              ) : null}
+
+              {/* Error Message */}
+              {errorMessage ? (
+                <View className="bg-red-100 border border-red-400 rounded-xl p-4 mb-4">
+                  <View className="flex-row items-start">
+                    <Ionicons name="alert-circle" size={20} color="#dc2626" style={{ marginTop: 2 }} />
+                    <Text className="text-red-700 ml-2 flex-1">{errorMessage}</Text>
+                  </View>
+                  {showResendButton ? (
+                    <Pressable 
+                      onPress={handleResendConfirmation}
+                      disabled={resendingEmail}
+                      className="mt-3 bg-red-600 py-2 px-4 rounded-lg"
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        {resendingEmail ? "Reenviando..." : "Reenviar Email de Confirmação"}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              ) : null}
+
+              {/* Info Message - Helpful for users */}
+              <View className="bg-blue-50 border border-blue-300 rounded-xl p-4 mb-4">
+                <Text className="text-blue-800 text-sm">
+                  💡 Se você acabou de se cadastrar, verifique sua caixa de entrada e confirme seu email antes de fazer login.
+                </Text>
+              </View>
 
               {/* Email Input */}
               <View className="mb-4">
@@ -161,11 +247,30 @@ export default function LoginScreen({ navigation }: any) {
             </View>
 
             {/* Register Link */}
-            <View className="flex-row items-center justify-center">
+            <View className="flex-row items-center justify-center mb-8">
               <Text className="text-gray-600 mr-2">Não tem uma conta?</Text>
               <Pressable onPress={() => navigation.navigate("Register")}>
                 <Text className="text-blue-500 font-semibold">Cadastre-se</Text>
               </Pressable>
+            </View>
+
+            {/* Help Section */}
+            <View className="bg-amber-50 border border-amber-300 rounded-xl p-4">
+              <Text className="text-amber-900 font-semibold mb-2">
+                🔐 Problemas para fazer login?
+              </Text>
+              <Text className="text-amber-800 text-sm mb-2">
+                • Verifique se confirmou seu email após o cadastro
+              </Text>
+              <Text className="text-amber-800 text-sm mb-2">
+                • Certifique-se de usar o email e senha corretos
+              </Text>
+              <Text className="text-amber-800 text-sm mb-2">
+                • Use a opção "Esqueci minha senha" para redefinir
+              </Text>
+              <Text className="text-amber-800 text-sm">
+                • Se acabou de se cadastrar, aguarde o email de confirmação
+              </Text>
             </View>
           </View>
         </ScrollView>

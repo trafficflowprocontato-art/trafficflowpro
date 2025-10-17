@@ -97,12 +97,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (data?.user) {
         console.log("✅ [authStore] Usuário criado com sucesso!");
         console.log("🔍 [authStore] email_confirmed_at:", data.user.email_confirmed_at);
-        console.log("🔍 [authStore] email_confirmed_at:", data.user.email_confirmed_at);
         
         // IMPORTANTE: Verificar se o email precisa ser confirmado
-        console.log("🔍 [authStore] emailConfirmed:", emailConfirmed);
         const emailConfirmed = data.user.email_confirmed_at !== null;
-        
         console.log("🔍 [authStore] emailConfirmed:", emailConfirmed);
         
         if (emailConfirmed) {
@@ -174,18 +171,32 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   
   login: async (email: string, password: string) => {
     try {
+      console.log("🔵 [authStore] Iniciando login para:", email);
+      
       if (!email || !password) {
+        console.log("❌ [authStore] Campos vazios");
         return { success: false, error: "Preencha email e senha" };
       }
       
+      console.log("🔵 [authStore] Chamando signIn...");
       // Login no Supabase
       const { data, error } = await signIn(email, password);
       
+      console.log("🔵 [authStore] Resultado signIn:", { 
+        hasData: !!data, 
+        hasUser: !!data?.user,
+        hasError: !!error,
+        errorMessage: error?.message 
+      });
+      
       if (error) {
+        console.error("❌ [authStore] Erro do Supabase:", error);
         throw error;
       }
       
       if (data?.user) {
+        console.log("✅ [authStore] Usuário autenticado:", data.user.email);
+        
         const profile = (data as any).profile;
         const user = {
           id: data.user.id,
@@ -194,35 +205,42 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           created_at: data.user.created_at,
         };
         
+        console.log("🔵 [authStore] Atualizando estado com usuário:", user.email);
         set({
           user,
           isAuthenticated: true,
         });
         
         // Carregar dados financeiros do Supabase
+        console.log("🔵 [authStore] Carregando dados financeiros...");
         useFinancialStore.getState().setUserId(user.id);
         await useFinancialStore.getState().loadData();
         
         // Verificar assinatura
+        console.log("🔵 [authStore] Verificando assinatura...");
         await get().checkSubscription();
         
         // Calcular trial info
+        console.log("🔵 [authStore] Calculando trial info...");
         get().calculateTrialInfo();
+        
+        console.log("✅ [authStore] Login completo!");
       }
       
       return { success: true };
     } catch (error: any) {
-      console.error("Erro no login:", error);
+      console.error("❌ [authStore] Erro no login:", error);
       let errorMessage = "Email ou senha incorretos";
       
       if (error.message?.includes("Email not confirmed")) {
         errorMessage = "Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.";
       } else if (error.message?.includes("Invalid login credentials")) {
-        errorMessage = "Email ou senha incorretos";
+        errorMessage = "Email ou senha incorretos. Verifique suas credenciais.";
       } else if (error.message) {
         errorMessage = error.message;
       }
       
+      console.log("❌ [authStore] Mensagem de erro final:", errorMessage);
       return { success: false, error: errorMessage };
     }
   },
