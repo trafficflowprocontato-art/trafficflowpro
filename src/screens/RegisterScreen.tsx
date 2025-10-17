@@ -26,29 +26,42 @@ export default function RegisterScreen({ navigation }: any) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [debugInfo, setDebugInfo] = useState("");
 
   const handleRegister = async () => {
+    setDebugInfo("🟢 Botão clicado!");
+    console.log("🟢 BOTÃO CLICADO - handleRegister chamado");
+    console.log("🟢 Dados:", { name, email, password: "***", confirmPassword: "***" });
+    
     // Validações
     if (!name || !email || !password || !confirmPassword) {
+      setDebugInfo("❌ Preencha todos os campos");
+      console.log("❌ Validação falhou: campos vazios");
       Alert.alert("Erro", "Preencha todos os campos");
       return;
     }
     
     if (password !== confirmPassword) {
+      setDebugInfo("❌ As senhas não coincidem");
+      console.log("❌ Validação falhou: senhas não coincidem");
       Alert.alert("Erro", "As senhas não coincidem");
       return;
     }
     
     if (password.length < 6) {
+      setDebugInfo("❌ Senha muito curta (mín. 6 caracteres)");
+      console.log("❌ Validação falhou: senha muito curta");
       Alert.alert("Erro", "A senha deve ter no mínimo 6 caracteres");
       return;
     }
     
+    setDebugInfo("🔵 Conectando ao servidor...");
     console.log("🔵 Iniciando registro...");
     setLoading(true);
     setError(""); // Limpar erro anterior
     
     try {
+      setDebugInfo("🔵 Enviando dados...");
       const result = await register(email.trim(), password, name.trim());
       console.log("🔵 Resultado do registro:", result);
       
@@ -56,8 +69,10 @@ export default function RegisterScreen({ navigation }: any) {
         console.error("❌ Erro no registro:", result.error);
         const errorMessage = result.error || "Erro desconhecido. Tente novamente.";
         setError(errorMessage);
+        setDebugInfo(`❌ Erro: ${errorMessage}`);
         Alert.alert("Erro no Cadastro", errorMessage);
       } else {
+        setDebugInfo("✅ Conta criada com sucesso!");
         console.log("✅ Registro bem-sucedido!");
         // Se sucesso, a navegação será automática pelo AppNavigator
       }
@@ -65,6 +80,7 @@ export default function RegisterScreen({ navigation }: any) {
       console.error("❌ Erro crítico no registro:", error);
       const errorMessage = "Ocorreu um erro ao criar a conta. Verifique sua conexão e tente novamente.";
       setError(errorMessage);
+      setDebugInfo(`❌ Erro crítico: ${error.message}`);
       Alert.alert("Erro", errorMessage);
     } finally {
       setLoading(false);
@@ -122,6 +138,15 @@ export default function RegisterScreen({ navigation }: any) {
                     {error}
                   </Text>
                 </View>
+              </View>
+            ) : null}
+
+            {/* Debug Info Banner */}
+            {debugInfo ? (
+              <View className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-4 mb-6">
+                <Text className="text-blue-800 font-medium text-center">
+                  {debugInfo}
+                </Text>
               </View>
             ) : null}
 
@@ -216,12 +241,20 @@ export default function RegisterScreen({ navigation }: any) {
 
               {/* Register Button */}
               <Pressable
-                onPress={handleRegister}
+                onPress={() => {
+                  console.log("🟢🟢🟢 PRESSABLE CLICADO!");
+                  handleRegister();
+                }}
                 disabled={loading}
                 className={`py-4 rounded-xl items-center ${
                   loading ? "bg-blue-300" : "bg-blue-500 active:bg-blue-600"
                 }`}
               >
+                {loading && (
+                  <View className="absolute left-4">
+                    <Ionicons name="sync" size={20} color="white" />
+                  </View>
+                )}
                 <Text className="text-white font-bold text-base">
                   {loading ? "Criando conta..." : "Criar Conta"}
                 </Text>
