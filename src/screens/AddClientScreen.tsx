@@ -61,18 +61,27 @@ export default function AddClientScreen() {
   // Função para formatar data no padrão brasileiro (DD/MM/AAAA)
   const handleDateInput = (text: string, setter: (value: string) => void) => {
     // Remove tudo que não é número
-    const cleaned = text.replace(/[^0-9]/g, '');
+    let cleaned = text.replace(/[^0-9]/g, '');
     
-    let formatted = cleaned;
+    // Limita a 8 dígitos
+    cleaned = cleaned.slice(0, 8);
     
-    // Adiciona a primeira barra após o dia (DD/)
-    if (cleaned.length >= 2) {
-      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
-    }
+    let formatted = '';
     
-    // Adiciona a segunda barra após o mês (DD/MM/)
-    if (cleaned.length >= 4) {
-      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8);
+    // Adiciona os números com as barras
+    if (cleaned.length > 0) {
+      // Dia (DD)
+      formatted = cleaned.slice(0, 2);
+      
+      if (cleaned.length >= 3) {
+        // Adiciona barra e mês (DD/MM)
+        formatted += '/' + cleaned.slice(2, 4);
+      }
+      
+      if (cleaned.length >= 5) {
+        // Adiciona barra e ano (DD/MM/AAAA)
+        formatted += '/' + cleaned.slice(4, 8);
+      }
     }
     
     setter(formatted);
@@ -81,53 +90,26 @@ export default function AddClientScreen() {
   // Função para formatar mês/ano (MM/AAAA)
   const handleMonthYearInput = (text: string, setter: (value: string) => void) => {
     // Remove tudo que não é número
-    const cleaned = text.replace(/[^0-9]/g, '');
+    let cleaned = text.replace(/[^0-9]/g, '');
     
-    let formatted = cleaned;
+    // Limita a 6 dígitos
+    cleaned = cleaned.slice(0, 6);
     
-    // Adiciona barra após o mês (MM/)
-    if (cleaned.length >= 2) {
-      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 6);
+    let formatted = '';
+    
+    // Adiciona os números com a barra
+    if (cleaned.length > 0) {
+      // Mês (MM)
+      formatted = cleaned.slice(0, 2);
+      
+      if (cleaned.length >= 3) {
+        // Adiciona barra e ano (MM/AAAA)
+        formatted += '/' + cleaned.slice(2, 6);
+      }
     }
     
     setter(formatted);
   };
-
-  // Converter DD/MM/AAAA para AAAA-MM-DD ao salvar
-  const convertBRDateToISO = (brDate: string): string => {
-    if (!brDate || brDate.length !== 10) return '';
-    const [day, month, year] = brDate.split('/');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Converter MM/AAAA para AAAA-MM ao salvar
-  const convertMonthYearToISO = (monthYear: string): string => {
-    if (!monthYear || monthYear.length !== 7) return '';
-    const [month, year] = monthYear.split('/');
-    return `${year}-${month}`;
-  };
-
-  // Converter AAAA-MM-DD para DD/MM/AAAA ao carregar
-  const convertISODateToBR = (isoDate: string): string => {
-    if (!isoDate) return '';
-    const [year, month, day] = isoDate.split('-');
-    if (!year || !month || !day) return '';
-    return `${day}/${month}/${year}`;
-  };
-
-  // Converter AAAA-MM para MM/AAAA ao carregar
-  const convertISOMonthToBR = (isoMonth: string): string => {
-    if (!isoMonth) return '';
-    const [year, month] = isoMonth.split('-');
-    if (!year || !month) return '';
-    return `${month}/${year}`;
-  };
-  };
-
-  useEffect(() => {
-    if (editingClient) {
-      setName(editingClient.name);
-      setMonthlyValue(editingClient.monthlyValue.toString());
       setPaymentDate(editingClient.paymentDate.toString());
       setPaymentStatus(editingClient.paymentStatus);
       setSellerCommission(editingClient.sellerCommission.toString());
@@ -282,17 +264,27 @@ export default function AddClientScreen() {
                   Data de Início do Contrato
                 </Text>
                 <Text className="text-gray-500 text-xs mb-2">
-                  Quando o cliente fechou o contrato (ex: 05/10/2025)
+                  Digite 8 números (ex: 17102025)
                 </Text>
-                <TextInput
-                  value={contractStartDate}
-                  onChangeText={(text) => handleDateInput(text, setContractStartDate)}
-                  placeholder="05/10/2025"
-                  keyboardType="number-pad"
-                  maxLength={10}
-                  className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
-                  placeholderTextColor="#9ca3af"
-                />
+                <View className="bg-white border-2 border-gray-300 rounded-xl px-4 py-3 flex-row items-center">
+                  <Ionicons name="calendar-outline" size={20} color="#6b7280" />
+                  <TextInput
+                    value={contractStartDate}
+                    onChangeText={(text) => handleDateInput(text, setContractStartDate)}
+                    placeholder="17/10/2025"
+                    keyboardType="number-pad"
+                    maxLength={10}
+                    className="flex-1 ml-3 text-base text-gray-900"
+                    placeholderTextColor="#9ca3af"
+                    style={{ fontVariant: ['tabular-nums'] }}
+                  />
+                </View>
+                {contractStartDate.length === 10 && (
+                  <View className="flex-row items-center mt-2">
+                    <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                    <Text className="text-green-600 text-xs ml-1">Data completa ✓</Text>
+                  </View>
+                )}
               </View>
 
               {/* Primeiro Mês de Pagamento */}
@@ -301,18 +293,33 @@ export default function AddClientScreen() {
                   Primeiro Mês de Pagamento
                 </Text>
                 <Text className="text-gray-500 text-xs mb-2">
-                  Quando ele deve pagar pela primeira vez (ex: 11/2025)
+                  Digite 6 números (ex: 112025)
                 </Text>
-                <TextInput
-                  value={firstPaymentMonth}
-                  onChangeText={(text) => handleMonthYearInput(text, setFirstPaymentMonth)}
-                  placeholder="11/2025"
-                  keyboardType="number-pad"
-                  maxLength={7}
-                  className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900"
-                  placeholderTextColor="#9ca3af"
-                />
+                <View className="bg-white border-2 border-gray-300 rounded-xl px-4 py-3 flex-row items-center">
+                  <Ionicons name="calendar-outline" size={20} color="#6b7280" />
+                  <TextInput
+                    value={firstPaymentMonth}
+                    onChangeText={(text) => handleMonthYearInput(text, setFirstPaymentMonth)}
+                    placeholder="11/2025"
+                    keyboardType="number-pad"
+                    maxLength={7}
+                    className="flex-1 ml-3 text-base text-gray-900"
+                    placeholderTextColor="#9ca3af"
+                    style={{ fontVariant: ['tabular-nums'] }}
+                  />
+                </View>
+                {firstPaymentMonth.length === 7 && (
+                  <View className="flex-row items-center mt-2">
+                    <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                    <Text className="text-green-600 text-xs ml-1">Mês completo ✓</Text>
+                  </View>
+                )}
                 {contractStartDate && !firstPaymentMonth && (
+                  <Text className="text-orange-600 text-xs mt-2">
+                    💡 Dica: Se fechou em 10/2025, normalmente o 1º pagamento é 11/2025
+                  </Text>
+                )}
+              </View>
                   <Text className="text-orange-600 text-xs mt-2">
                     💡 Dica: Se fechou em 10/2025, normalmente o 1º pagamento é 11/2025
                   </Text>
