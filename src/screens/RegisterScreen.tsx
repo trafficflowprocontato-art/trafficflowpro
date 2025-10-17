@@ -145,6 +145,11 @@ export default function RegisterScreen({ navigation }: any) {
           showsVerticalScrollIndicator={false}
         >
           <View className="flex-1 px-6">
+            {/* Banner de versão atualizada */}
+            <View className="bg-purple-600 rounded-2xl p-3 mb-3">
+              <Text className="text-white text-center font-bold text-sm">🔒 SENHA SEGURA ATIVADA v2.1</Text>
+            </View>
+            
             <View className="bg-green-500 rounded-2xl p-4 mb-6">
               <Text className="text-white text-center font-bold text-lg">🎉 7 DIAS GRÁTIS</Text>
               <Text className="text-white text-center text-sm mt-1">Teste completo sem cartão</Text>
