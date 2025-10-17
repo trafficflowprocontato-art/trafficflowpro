@@ -18,52 +18,70 @@ export default function RegisterScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    console.log("🟢 [RegisterScreen] Botão clicado!");
+    
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
     
+    console.log("🟢 [RegisterScreen] Dados:", { trimmedName, trimmedEmail, password: "***" });
+    
     if (!trimmedName || !trimmedEmail || !password || !confirmPassword) {
+      console.log("❌ [RegisterScreen] Campos vazios");
       Alert.alert("Campos obrigatórios", "Preencha todos os campos");
       return;
     }
 
     if (trimmedName.length < 2) {
+      console.log("❌ [RegisterScreen] Nome muito curto");
       Alert.alert("Nome inválido", "O nome deve ter no mínimo 2 caracteres");
       return;
     }
 
     if (!trimmedEmail.includes("@")) {
+      console.log("❌ [RegisterScreen] Email inválido");
       Alert.alert("Email inválido", "Digite um email válido");
       return;
     }
     
     if (password.length < 6) {
+      console.log("❌ [RegisterScreen] Senha muito curta");
       Alert.alert("Senha fraca", "A senha deve ter no mínimo 6 caracteres");
       return;
     }
 
     if (password !== confirmPassword) {
+      console.log("❌ [RegisterScreen] Senhas diferentes");
       Alert.alert("Senhas diferentes", "As senhas não coincidem");
       return;
     }
     
+    console.log("🔵 [RegisterScreen] Chamando register...");
     setLoading(true);
     
     try {
       const result = await register(trimmedEmail, password, trimmedName);
       
+      console.log("🔵 [RegisterScreen] Resultado:", result);
+      
       if (!result.success) {
+        console.error("❌ [RegisterScreen] Erro:", result.error);
         let errorMsg = result.error || "Erro ao criar conta";
         
         if (errorMsg.includes("already")) {
           errorMsg = "Email já cadastrado. Tente fazer login.";
         }
         
-        Alert.alert("Erro", errorMsg);
+        Alert.alert("Erro ao criar conta", errorMsg);
+      } else {
+        console.log("✅ [RegisterScreen] Sucesso! Conta criada!");
+        Alert.alert("Sucesso!", "Conta criada com sucesso! Redirecionando...");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ [RegisterScreen] Erro crítico:", error);
       Alert.alert("Erro", "Não foi possível criar sua conta. Tente novamente.");
     } finally {
       setLoading(false);
+      console.log("🔵 [RegisterScreen] Loading finalizado");
     }
   };
 
