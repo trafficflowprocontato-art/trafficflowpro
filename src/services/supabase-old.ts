@@ -4,27 +4,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'SUA_URL_AQUI';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'SUA_ANON_KEY_AQUI';
 
-// Verificar se as credenciais estão configuradas
-if (SUPABASE_URL === 'SUA_URL_AQUI' || SUPABASE_ANON_KEY === 'SUA_ANON_KEY_AQUI') {
-  console.error('⚠️ ATENÇÃO: Credenciais do Supabase não configuradas!');
-  console.error('📝 Crie um arquivo .env na raiz com:');
-  console.error('   EXPO_PUBLIC_SUPABASE_URL=sua_url');
-  console.error('   EXPO_PUBLIC_SUPABASE_ANON_KEY=sua_key');
-}
-
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
+    detectSessionInUrl: false,
   },
 });
 
-// Funções de autenticação SIMPLIFICADAS
+// FUNÇÕES DE AUTENTICAÇÃO SIMPLIFICADAS (SEM TABELA USERS)
+
 export async function signUp(email: string, password: string, name: string) {
   try {
-    console.log('🔵 signUp chamado:', { email, name });
+    console.log('🔵 Iniciando registro:', { email, name });
     
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -36,42 +29,45 @@ export async function signUp(email: string, password: string, name: string) {
       },
     });
 
-    console.log('🔵 Resultado auth.signUp:', { data, error });
+    if (error) {
+      console.error('❌ Erro no signUp:', error);
+      throw error;
+    }
 
-    if (error) throw error;
-    
-    console.log('✅ Usuário criado com sucesso!');
+    console.log('✅ Usuário criado com sucesso!', data);
     return { data, error: null };
   } catch (error: any) {
-    console.error('❌ Erro no registro:', error);
+    console.error('❌ Erro crítico no registro:', error);
     return { data: null, error };
   }
 }
 
 export async function signIn(email: string, password: string) {
   try {
+    console.log('🔵 Tentando login:', { email });
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) throw error;
-
-    // Usar dados do user_metadata
-    if (data.user) {
-      const profile = {
-        id: data.user.id,
-        email: data.user.email!,
-        name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-        created_at: data.user.created_at
-      };
-
-      return { data: { ...data, profile }, error: null };
+    if (error) {
+      console.error('❌ Erro no login:', error);
+      throw error;
     }
 
-    return { data, error: null };
+    // Criar objeto profile a partir dos metadados
+    const profile = {
+      id: data.user.id,
+      email: data.user.email!,
+      name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
+      created_at: data.user.created_at
+    };
+
+    console.log('✅ Login bem-sucedido!');
+    return { data: { ...data, profile }, error: null };
   } catch (error: any) {
-    console.error('Erro no login:', error);
+    console.error('❌ Erro no login:', error);
     return { data: null, error };
   }
 }
@@ -82,7 +78,7 @@ export async function signOut() {
     if (error) throw error;
     return { error: null };
   } catch (error: any) {
-    console.error('Erro no logout:', error);
+    console.error('❌ Erro no logout:', error);
     return { error };
   }
 }
@@ -91,16 +87,11 @@ export async function getCurrentUser() {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     
-    if (error) {
-      console.log('Erro ao buscar usuário (normal se não logado):', error.message);
-      return { user: null, profile: null, error: null };
-    }
-    
-    if (!user) {
+    if (error || !user) {
       return { user: null, profile: null, error: null };
     }
 
-    // Usar dados do user_metadata
+    // Criar objeto profile a partir dos metadados
     const profile = {
       id: user.id,
       email: user.email!,
@@ -110,7 +101,7 @@ export async function getCurrentUser() {
 
     return { user, profile, error: null };
   } catch (error: any) {
-    console.error('Erro ao buscar usuário:', error);
+    console.error('❌ Erro ao buscar usuário:', error);
     return { user: null, profile: null, error: null };
   }
 }
@@ -123,7 +114,7 @@ export async function resetPassword(email: string) {
     if (error) throw error;
     return { error: null };
   } catch (error: any) {
-    console.error('Erro ao resetar senha:', error);
+    console.error('❌ Erro ao resetar senha:', error);
     return { error };
   }
 }
