@@ -96,9 +96,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       
       if (data?.user) {
         console.log("✅ [authStore] Usuário criado com sucesso!");
+        console.log("🔍 [authStore] email_confirmed_at:", data.user.email_confirmed_at);
+        console.log("🔍 [authStore] email_confirmed_at:", data.user.email_confirmed_at);
         
         // IMPORTANTE: Verificar se o email precisa ser confirmado
+        console.log("🔍 [authStore] emailConfirmed:", emailConfirmed);
         const emailConfirmed = data.user.email_confirmed_at !== null;
+        
+        console.log("🔍 [authStore] emailConfirmed:", emailConfirmed);
         
         if (emailConfirmed) {
           // Email já confirmado (improvável em novo cadastro)
@@ -121,17 +126,25 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           // Carregar dados financeiros do Supabase
           useFinancialStore.getState().setUserId(user.id);
           await useFinancialStore.getState().loadData();
+          console.log("🔵 Chamando signOut para remover sessão...");
         } else {
           // Email não confirmado - NÃO logar, apenas retornar sucesso
           console.log("📧 Email não confirmado - usuário deve confirmar antes de logar");
+          console.log("✅ SignOut executado");
+          console.log("🔵 Chamando signOut para remover sessão...");
           
           // Fazer logout para garantir que não fica logado
           await signOut();
+          
+          console.log("✅ Estado atualizado: user=null, isAuthenticated=false");
+          console.log("✅ SignOut executado");
           
           set({
             user: null,
             isAuthenticated: false,
           });
+          
+          console.log("✅ Estado atualizado: user=null, isAuthenticated=false");
         }
         
         console.log("✅ [authStore] Registro completo!");

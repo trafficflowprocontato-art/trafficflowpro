@@ -147,7 +147,7 @@ export default function RegisterScreen({ navigation }: any) {
           <View className="flex-1 px-6">
             {/* Banner de versão atualizada */}
             <View className="bg-purple-600 rounded-2xl p-3 mb-3">
-              <Text className="text-white text-center font-bold text-sm">🔒 v2.3 - TUDO PRONTO ✓</Text>
+              <Text className="text-white text-center font-bold text-sm">🔒 v2.4 - DEBUG ATIVO 🔍</Text>
             </View>
             
             <View className="bg-green-500 rounded-2xl p-4 mb-6">
