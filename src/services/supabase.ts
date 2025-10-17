@@ -15,21 +15,56 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 export async function signUp(email: string, password: string, name: string) {
   try {
-    console.log('✅ Iniciando registro:', { email, name });
+    console.log('🔵 [supabase] signUp chamado');
     
-    const { data, error } = await supabase.auth.signUp({
+    // 1. Criar usuário no auth (sem autoConfirm para evitar trigger)
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { name },
+        emailRedirectTo: undefined,
       },
     });
 
-    if (error) throw error;
-    console.log('✅ Usuário criado!', data);
-    return { data, error: null };
+    console.log('🔵 [supabase] auth.signUp resultado:', { authData: !!authData, authError: authError?.message });
+
+    if (authError) throw authError;
+    
+    if (!authData.user) {
+      throw new Error('Usuário não foi criado');
+    }
+
+    console.log('🔵 [supabase] Usuário criado no auth, ID:', authData.user.id);
+
+    // 2. Inserir manualmente na tabela users (SEM depender de trigger)
+    try {
+      console.log('🔵 [supabase] Inserindo na tabela users...');
+      
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email: authData.user.email!,
+          name: name,
+          created_at: authData.user.created_at,
+        });
+
+      if (insertError) {
+        console.error('⚠️ [supabase] Erro ao inserir em users (não crítico):', insertError);
+        // NÃO throw - deixa continuar mesmo se falhar
+      } else {
+        console.log('✅ [supabase] Inserido na tabela users com sucesso!');
+      }
+    } catch (insertErr) {
+      console.error('⚠️ [supabase] Erro ao inserir em users (ignorado):', insertErr);
+      // Ignora erro da tabela users - o importante é que o auth funcionou
+    }
+
+    console.log('✅ [supabase] signUp completo!');
+    return { data: authData, error: null };
   } catch (error: any) {
-    console.error('❌ Erro:', error);
+    console.error('❌ [supabase] Erro no signUp:', error);
     return { data: null, error };
   }
 }
