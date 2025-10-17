@@ -25,10 +25,6 @@ interface AuthState {
   trialInfo: TrialInfo | null;
   
   // Actions
-
-  // Validação de email em tempo real
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isEmailValid = emailRegex.test(email.trim());
   register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
