@@ -34,6 +34,8 @@ export default function AddClientScreen() {
   const [sellerCommission, setSellerCommission] = useState("");
   const [sellerName, setSellerName] = useState("");
   const [extraExpenses, setExtraExpenses] = useState<ExtraExpense[]>([]);
+  const [contractStartDate, setContractStartDate] = useState("");
+  const [firstPaymentMonth, setFirstPaymentMonth] = useState("");
   const [newExpenseDesc, setNewExpenseDesc] = useState("");
   const [newExpenseValue, setNewExpenseValue] = useState("");
 
@@ -67,6 +69,8 @@ export default function AddClientScreen() {
       setSellerName(editingClient.sellerName || "");
       setExtraExpenses(editingClient.extraExpenses);
     }
+      setContractStartDate(editingClient.contractStartDate || "");
+      setFirstPaymentMonth(editingClient.firstPaymentMonth || "");
   }, [editingClient]);
 
   const handleAddExtraExpense = () => {
@@ -104,6 +108,9 @@ export default function AddClientScreen() {
       sellerCommission: commission,
       sellerName: seller,
       extraExpenses,
+      contractStartDate: contractStartDate || undefined,
+      firstPaymentMonth: firstPaymentMonth || undefined,
+    };
     };
 
     if (isEditing) {
@@ -203,6 +210,45 @@ export default function AddClientScreen() {
                   className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
                   placeholderTextColor="#9ca3af"
                 />
+              </View>
+
+              {/* Data de Início do Contrato */}
+              <View className="mb-5">
+                <Text className="text-gray-700 font-medium mb-2">
+                  Data de Início do Contrato
+                </Text>
+                <Text className="text-gray-500 text-xs mb-2">
+                  Quando o cliente fechou o contrato (ex: 2025-10-05)
+                </Text>
+                <TextInput
+                  value={contractStartDate}
+                  onChangeText={setContractStartDate}
+                  placeholder="2025-10-05"
+                  className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              {/* Primeiro Mês de Pagamento */}
+              <View className="mb-5">
+                <Text className="text-gray-700 font-medium mb-2">
+                  Primeiro Mês de Pagamento
+                </Text>
+                <Text className="text-gray-500 text-xs mb-2">
+                  Quando ele deve pagar pela primeira vez (ex: 2025-11)
+                </Text>
+                <TextInput
+                  value={firstPaymentMonth}
+                  onChangeText={setFirstPaymentMonth}
+                  placeholder="2025-11"
+                  className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900"
+                  placeholderTextColor="#9ca3af"
+                />
+                {contractStartDate && !firstPaymentMonth && (
+                  <Text className="text-orange-600 text-xs mt-2">
+                    💡 Dica: Se fechou em 2025-10, normalmente o 1º pagamento é 2025-11
+                  </Text>
+                )}
               </View>
 
               {/* Payment Status */}

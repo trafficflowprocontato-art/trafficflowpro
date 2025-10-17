@@ -14,10 +14,23 @@ export default function PaymentsScreen({ navigation }: any) {
   const [filter, setFilter] = useState<"all" | "pending" | "overdue" | "paid">("all");
 
   // Calcular status automaticamente baseado na data
-  const getClientStatus = (client: Client): "paid" | "pending" | "overdue" => {
+  const getClientStatus = (client: Client): "paid" | "pending" | "overdue" | null => {
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Se tem primeiro mês de pagamento definido, verificar se já chegou
+    if (client.firstPaymentMonth) {
+      // Converter "2025-11" para Date
+      const [year, month] = client.firstPaymentMonth.split('-').map(Number);
+      const firstPaymentDate = new Date(year, month - 1, 1);
+      const todayFirstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      
+      // Se ainda não chegou no primeiro mês de pagamento
+      if (todayFirstDay < firstPaymentDate) {
+        return null; // Não cobra ainda
+      }
+    }
     
     // Se já pagou este mês
     if (client.lastPaymentMonth === currentMonth) {
@@ -34,6 +47,7 @@ export default function PaymentsScreen({ navigation }: any) {
   };
 
   // Filtrar clientes
+  // Filtrar clientes
   const filteredClients = useMemo(() => {
     return clients
       .map(client => ({
@@ -41,6 +55,9 @@ export default function PaymentsScreen({ navigation }: any) {
         realStatus: getClientStatus(client)
       }))
       .filter(client => {
+        // Não mostrar clientes que ainda não começaram a ser cobrados
+        if (client.realStatus === null) return false;
+        
         if (filter === "all") return true;
         return client.realStatus === filter;
       })
@@ -55,11 +72,14 @@ export default function PaymentsScreen({ navigation }: any) {
 
   // Contadores
   const counts = useMemo(() => {
-    const all = clients.map(c => ({ ...c, realStatus: getClientStatus(c) }));
+    const all = clients.map(c => ({ ...c, realStatus: getClientStatus(c) })).filter(c => c.realStatus !== null);
     return {
       all: all.length,
       pending: all.filter(c => c.realStatus === "pending").length,
       overdue: all.filter(c => c.realStatus === "overdue").length,
+      paid: all.filter(c => c.realStatus === "paid").length,
+    };
+  }, [clients]);
       paid: all.filter(c => c.realStatus === "paid").length,
     };
   }, [clients]);

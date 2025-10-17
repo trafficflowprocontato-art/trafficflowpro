@@ -11,6 +11,8 @@ export interface Client {
   sellerName: string; // Nome do vendedor
   extraExpenses: ExtraExpense[];
   lastPaymentMonth?: string; // formato: "2025-10" - último mês que pagou
+  contractStartDate?: string; // formato: "2025-10-05" - data de início do contrato
+  firstPaymentMonth?: string; // formato: "2025-11" - primeiro mês de cobrança
 }
 
 export interface ClientPaymentHistory {
@@ -55,4 +57,12 @@ export interface FinancialSummary {
   totalExtraExpenses: number;
   totalAgencyExpenses: number;
   netProfit: number;
+}
+
+export interface MonthlyData {
+  month: string; // formato: "2025-10"
+  monthLabel: string; // "Outubro 2025"
+  summary: FinancialSummary;
+  clientCount: number;
+  paidClientsCount: number;
 }
