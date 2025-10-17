@@ -27,6 +27,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
+  const [buttonClicked, setButtonClicked] = useState(false);
 
   const handleRegister = async () => {
     setDebugInfo("🟢 Botão clicado!");
@@ -242,12 +243,14 @@ export default function RegisterScreen({ navigation }: any) {
               {/* Register Button */}
               <Pressable
                 onPress={() => {
+                  setButtonClicked(true);
+                  setTimeout(() => setButtonClicked(false), 2000);
                   console.log("🟢🟢🟢 PRESSABLE CLICADO!");
                   handleRegister();
                 }}
                 disabled={loading}
                 className={`py-4 rounded-xl items-center ${
-                  loading ? "bg-blue-300" : "bg-blue-500 active:bg-blue-600"
+                  buttonClicked ? "bg-green-500" : loading ? "bg-blue-300" : "bg-blue-500 active:bg-blue-600"
                 }`}
               >
                 {loading && (
@@ -256,7 +259,7 @@ export default function RegisterScreen({ navigation }: any) {
                   </View>
                 )}
                 <Text className="text-white font-bold text-base">
-                  {loading ? "Criando conta..." : "Criar Conta"}
+                  {buttonClicked ? "CLICADO!" : loading ? "Criando conta..." : "Criar Conta"}
                 </Text>
               </Pressable>
             </View>
