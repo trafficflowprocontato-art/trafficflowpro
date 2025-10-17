@@ -73,7 +73,260 @@ export default function DashboardScreen() {
     }
   };
 
-  return (
+  // Desktop Layout Component
+  const DesktopDashboard = () => (
+    <View className="flex-1 bg-gray-50">
+      <ScrollView 
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Desktop */}
+        <View className="bg-white border-b border-gray-200 px-8 py-6">
+          <View className="max-w-7xl mx-auto w-full flex-row justify-between items-center">
+            <View>
+              <Text className="text-3xl font-bold text-gray-900">Dashboard</Text>
+              <Text className="text-gray-500 mt-1">Bem-vindo, {user?.name || "Usuário"}! 👋</Text>
+            </View>
+            <Pressable
+              onPress={handleLogout}
+              className="flex-row items-center gap-2 px-4 py-2 bg-red-50 rounded-xl border border-red-200"
+            >
+              <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+              <Text className="text-red-600 font-semibold">Sair</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View className="max-w-7xl mx-auto w-full px-8 py-8">
+          {/* Trial Banner Desktop */}
+          {trialInfo && !trialInfo.hasFullAccess && (
+            <View className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 mb-8 shadow-sm">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center flex-1">
+                  <View className="w-12 h-12 bg-amber-400 rounded-full items-center justify-center mr-4">
+                    <Ionicons name="time-outline" size={24} color="white" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-amber-900 text-xl font-bold mb-1">Período Gratuito Expirado</Text>
+                    <Text className="text-amber-700 text-sm">Assine para continuar criando e editando seus dados</Text>
+                  </View>
+                </View>
+                <Pressable className="bg-amber-500 px-6 py-3 rounded-xl">
+                  <Text className="text-white font-bold">Ver Planos</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+          
+          {trialInfo && trialInfo.hasFullAccess && trialInfo.daysLeft <= 7 && (
+            <View className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-6 mb-8 shadow-sm">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center flex-1">
+                  <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center mr-4">
+                    <Ionicons name="gift-outline" size={24} color="white" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-blue-900 text-xl font-bold mb-1">
+                      {trialInfo.daysLeft} {trialInfo.daysLeft === 1 ? "dia" : "dias"} restantes
+                    </Text>
+                    <Text className="text-blue-700 text-sm">Aproveite seu teste gratuito!</Text>
+                  </View>
+                </View>
+                <Pressable className="bg-blue-500 px-6 py-3 rounded-xl">
+                  <Text className="text-white font-bold">Assinar Agora</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {/* Cards Grid - 3 colunas */}
+          <View className="flex-row gap-6 mb-8">
+            {/* Card Lucro Líquido */}
+            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+              <View className="flex-row items-center mb-4">
+                <View className="w-12 h-12 bg-green-100 rounded-xl items-center justify-center mr-3">
+                  <Ionicons name="trending-up" size={24} color="#10b981" />
+                </View>
+                <Text className="text-gray-600 text-sm font-semibold">LUCRO LÍQUIDO</Text>
+              </View>
+              <Text className="text-green-500 text-4xl font-bold mb-2">
+                {formatCurrency(summary.netProfit)}
+              </Text>
+              <Text className="text-gray-500 text-sm">
+                Receita: {formatCurrency(summary.totalRevenue)}
+              </Text>
+            </View>
+
+            {/* Card Receita Total */}
+            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+              <View className="flex-row items-center mb-4">
+                <View className="w-12 h-12 bg-blue-100 rounded-xl items-center justify-center mr-3">
+                  <Ionicons name="cash" size={24} color="#3b82f6" />
+                </View>
+                <Text className="text-gray-600 text-sm font-semibold">RECEITA TOTAL</Text>
+              </View>
+              <Text className="text-blue-600 text-4xl font-bold mb-2">
+                {formatCurrency(summary.totalRevenue)}
+              </Text>
+              <Text className="text-gray-500 text-sm">
+                {clients.length} {clients.length === 1 ? "cliente" : "clientes"}
+              </Text>
+            </View>
+
+            {/* Card Despesas */}
+            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+              <View className="flex-row items-center mb-4">
+                <View className="w-12 h-12 bg-red-100 rounded-xl items-center justify-center mr-3">
+                  <Ionicons name="wallet" size={24} color="#ef4444" />
+                </View>
+                <Text className="text-gray-600 text-sm font-semibold">DESPESAS TOTAIS</Text>
+              </View>
+              <Text className="text-red-500 text-4xl font-bold mb-2">
+                {formatCurrency(summary.totalExpenses)}
+              </Text>
+              <Text className="text-gray-500 text-sm">
+                Comissões + Despesas
+              </Text>
+            </View>
+          </View>
+
+          {/* Status de Pagamentos - Grid 3 colunas */}
+          <View className="mb-8">
+            <Text className="text-xl font-bold text-gray-900 mb-4">Status de Pagamentos</Text>
+            <View className="flex-row gap-6">
+              <View className="flex-1 bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+                <View className="flex-row items-center mb-3">
+                  <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+                  <Text className="text-green-700 font-semibold ml-2">PAGOS</Text>
+                </View>
+                <Text className="text-green-900 text-5xl font-bold">{paidClients}</Text>
+              </View>
+
+              <View className="flex-1 bg-yellow-50 rounded-2xl p-6 border-2 border-yellow-200">
+                <View className="flex-row items-center mb-3">
+                  <Ionicons name="time" size={24} color="#f59e0b" />
+                  <Text className="text-yellow-700 font-semibold ml-2">PENDENTES</Text>
+                </View>
+                <Text className="text-yellow-900 text-5xl font-bold">{pendingClients}</Text>
+              </View>
+
+              <View className="flex-1 bg-red-50 rounded-2xl p-6 border-2 border-red-200">
+                <View className="flex-row items-center mb-3">
+                  <Ionicons name="alert-circle" size={24} color="#ef4444" />
+                  <Text className="text-red-700 font-semibold ml-2">ATRASADOS</Text>
+                </View>
+                <Text className="text-red-900 text-5xl font-bold">{overdueClients}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Resumo Financeiro - Grid 2 colunas */}
+          <View className="flex-row gap-6">
+            {/* Coluna Esquerda */}
+            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+              <Text className="text-xl font-bold text-gray-900 mb-6">Resumo Financeiro</Text>
+              
+              <View className="space-y-4">
+                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 bg-green-100 rounded-lg items-center justify-center mr-3">
+                      <Ionicons name="arrow-down" size={20} color="#10b981" />
+                    </View>
+                    <Text className="text-gray-700 font-medium">Receita Total</Text>
+                  </View>
+                  <Text className="text-green-600 text-xl font-bold">{formatCurrency(summary.totalRevenue)}</Text>
+                </View>
+
+                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 bg-orange-100 rounded-lg items-center justify-center mr-3">
+                      <Ionicons name="people" size={20} color="#f97316" />
+                    </View>
+                    <Text className="text-gray-700 font-medium">Comissões</Text>
+                  </View>
+                  <Text className="text-orange-600 text-xl font-bold">-{formatCurrency(summary.totalCommissions)}</Text>
+                </View>
+
+                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 bg-purple-100 rounded-lg items-center justify-center mr-3">
+                      <Ionicons name="cart" size={20} color="#a855f7" />
+                    </View>
+                    <Text className="text-gray-700 font-medium">Despesas Extras</Text>
+                  </View>
+                  <Text className="text-purple-600 text-xl font-bold">-{formatCurrency(summary.totalExtraExpenses)}</Text>
+                </View>
+
+                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 bg-blue-100 rounded-lg items-center justify-center mr-3">
+                      <Ionicons name="business" size={20} color="#3b82f6" />
+                    </View>
+                    <Text className="text-gray-700 font-medium">Despesas da Agência</Text>
+                  </View>
+                  <Text className="text-blue-600 text-xl font-bold">-{formatCurrency(summary.totalAgencyExpenses)}</Text>
+                </View>
+
+                <View className="flex-row items-center justify-between py-4">
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 bg-red-100 rounded-lg items-center justify-center mr-3">
+                      <Ionicons name="arrow-up" size={20} color="#ef4444" />
+                    </View>
+                    <Text className="text-gray-700 font-medium">Total de Despesas</Text>
+                  </View>
+                  <Text className="text-red-600 text-xl font-bold">-{formatCurrency(summary.totalExpenses)}</Text>
+                </View>
+              </View>
+
+              <View className="bg-green-50 rounded-xl p-6 mt-6 border-2 border-green-200">
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-gray-700 text-lg font-bold">Lucro Líquido</Text>
+                  <Text className="text-green-600 text-3xl font-bold">{formatCurrency(summary.netProfit)}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Coluna Direita - Estatísticas Rápidas */}
+            <View className="flex-1 space-y-6">
+              <View className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                <Text className="text-lg font-bold text-gray-900 mb-4">📊 Estatísticas</Text>
+                
+                <View className="space-y-4">
+                  <View>
+                    <Text className="text-gray-500 text-sm mb-1">Total de Clientes</Text>
+                    <Text className="text-gray-900 text-2xl font-bold">{clients.length}</Text>
+                  </View>
+                  
+                  <View>
+                    <Text className="text-gray-500 text-sm mb-1">Despesas da Agência</Text>
+                    <Text className="text-gray-900 text-2xl font-bold">{agencyExpenses.length}</Text>
+                  </View>
+                  
+                  <View>
+                    <Text className="text-gray-500 text-sm mb-1">Comissões Registradas</Text>
+                    <Text className="text-gray-900 text-2xl font-bold">{sellerCommissions.length}</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View className="bg-blue-500 rounded-2xl p-6 shadow-lg">
+                <Ionicons name="rocket" size={32} color="white" />
+                <Text className="text-white text-xl font-bold mt-4 mb-2">Melhore seus Resultados</Text>
+                <Text className="text-blue-100 text-sm mb-4">Explore todas as funcionalidades do TrafficFlow Pro</Text>
+                <Pressable className="bg-white rounded-xl py-3 px-4">
+                  <Text className="text-blue-600 font-bold text-center">Saiba Mais</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+
+  // Mobile Layout Component (mantém o design atual)
+  const MobileDashboard = () => (
     <WebContainer>
       <ScrollView 
         className="flex-1 bg-gray-50"
@@ -156,7 +409,7 @@ export default function DashboardScreen() {
           <Text className="text-lg font-semibold text-gray-900 mb-3">
             Status de Pagamentos
           </Text>
-          <View className={isDesktop ? "flex-row gap-4" : "flex-row gap-3"}>
+          <View className="flex-row gap-3">
             <View className="flex-1 bg-green-50 rounded-2xl p-4 border border-green-100">
               <View className="flex-row items-center mb-1">
                 <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
@@ -288,4 +541,7 @@ export default function DashboardScreen() {
     </ScrollView>
     </WebContainer>
   );
+
+  // Render desktop or mobile based on screen size
+  return isDesktop ? <DesktopDashboard /> : <MobileDashboard />;
 }
