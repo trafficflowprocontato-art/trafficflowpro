@@ -10,6 +10,7 @@ import ClientsScreen from "../screens/ClientsScreen";
 import ExpensesScreen from "../screens/ExpensesScreen";
 import SellersScreen from "../screens/SellersScreen";
 import AddClientScreen from "../screens/AddClientScreen";
+import PaymentsScreen from "../screens/PaymentsScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
@@ -81,8 +82,17 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Plans"
-        component={PricingScreen}
+        name="Payments"
+        component={PaymentsScreen}
+        options={{
+          tabBarLabel: "Cobranças",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="card" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Plans"        component={PricingScreen}
         options={{
           tabBarLabel: "Planos",
           tabBarIcon: ({ color, size }) => (
@@ -119,6 +129,7 @@ function AppStack() {
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen
         name="AddClient"
+      <Stack.Screen name="Payments" component={PaymentsScreen} />
         component={AddClientScreen}
         options={{
           presentation: "modal",
