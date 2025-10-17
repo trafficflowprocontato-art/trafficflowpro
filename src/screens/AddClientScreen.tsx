@@ -57,6 +57,71 @@ export default function AddClientScreen() {
     if (cleaned === '' || (num >= 1 && num <= 31)) {
       setter(cleaned);
     }
+
+  // Função para formatar data no padrão brasileiro (DD/MM/AAAA)
+  const handleDateInput = (text: string, setter: (value: string) => void) => {
+    // Remove tudo que não é número
+    const cleaned = text.replace(/[^0-9]/g, '');
+    
+    let formatted = cleaned;
+    
+    // Adiciona a primeira barra após o dia (DD/)
+    if (cleaned.length >= 2) {
+      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
+    }
+    
+    // Adiciona a segunda barra após o mês (DD/MM/)
+    if (cleaned.length >= 4) {
+      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8);
+    }
+    
+    setter(formatted);
+  };
+
+  // Função para formatar mês/ano (MM/AAAA)
+  const handleMonthYearInput = (text: string, setter: (value: string) => void) => {
+    // Remove tudo que não é número
+    const cleaned = text.replace(/[^0-9]/g, '');
+    
+    let formatted = cleaned;
+    
+    // Adiciona barra após o mês (MM/)
+    if (cleaned.length >= 2) {
+      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 6);
+    }
+    
+    setter(formatted);
+  };
+
+  // Converter DD/MM/AAAA para AAAA-MM-DD ao salvar
+  const convertBRDateToISO = (brDate: string): string => {
+    if (!brDate || brDate.length !== 10) return '';
+    const [day, month, year] = brDate.split('/');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Converter MM/AAAA para AAAA-MM ao salvar
+  const convertMonthYearToISO = (monthYear: string): string => {
+    if (!monthYear || monthYear.length !== 7) return '';
+    const [month, year] = monthYear.split('/');
+    return `${year}-${month}`;
+  };
+
+  // Converter AAAA-MM-DD para DD/MM/AAAA ao carregar
+  const convertISODateToBR = (isoDate: string): string => {
+    if (!isoDate) return '';
+    const [year, month, day] = isoDate.split('-');
+    if (!year || !month || !day) return '';
+    return `${day}/${month}/${year}`;
+  };
+
+  // Converter AAAA-MM para MM/AAAA ao carregar
+  const convertISOMonthToBR = (isoMonth: string): string => {
+    if (!isoMonth) return '';
+    const [year, month] = isoMonth.split('-');
+    if (!year || !month) return '';
+    return `${month}/${year}`;
+  };
   };
 
   useEffect(() => {
@@ -68,8 +133,8 @@ export default function AddClientScreen() {
       setSellerCommission(editingClient.sellerCommission.toString());
       setSellerName(editingClient.sellerName || "");
       setExtraExpenses(editingClient.extraExpenses);
-      setContractStartDate(editingClient.contractStartDate || "");
-      setFirstPaymentMonth(editingClient.firstPaymentMonth || "");
+      setContractStartDate(convertISODateToBR(editingClient.contractStartDate || ""));
+      setFirstPaymentMonth(convertISOMonthToBR(editingClient.firstPaymentMonth || ""));
     }
   }, [editingClient]);
 
@@ -107,8 +172,8 @@ export default function AddClientScreen() {
       paymentStatus,
       sellerCommission: commission,
       sellerName: seller,
-      extraExpenses,
-      contractStartDate: contractStartDate || undefined,
+      contractStartDate: convertBRDateToISO(contractStartDate) || undefined,
+      firstPaymentMonth: convertMonthYearToISO(firstPaymentMonth) || undefined,
       firstPaymentMonth: firstPaymentMonth || undefined,
     };
 
@@ -217,12 +282,14 @@ export default function AddClientScreen() {
                   Data de Início do Contrato
                 </Text>
                 <Text className="text-gray-500 text-xs mb-2">
-                  Quando o cliente fechou o contrato (ex: 2025-10-05)
+                  Quando o cliente fechou o contrato (ex: 05/10/2025)
                 </Text>
                 <TextInput
                   value={contractStartDate}
-                  onChangeText={setContractStartDate}
-                  placeholder="2025-10-05"
+                  onChangeText={(text) => handleDateInput(text, setContractStartDate)}
+                  placeholder="05/10/2025"
+                  keyboardType="number-pad"
+                  maxLength={10}
                   className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
                   placeholderTextColor="#9ca3af"
                 />
@@ -234,14 +301,23 @@ export default function AddClientScreen() {
                   Primeiro Mês de Pagamento
                 </Text>
                 <Text className="text-gray-500 text-xs mb-2">
-                  Quando ele deve pagar pela primeira vez (ex: 2025-11)
+                  Quando ele deve pagar pela primeira vez (ex: 11/2025)
                 </Text>
                 <TextInput
                   value={firstPaymentMonth}
-                  onChangeText={setFirstPaymentMonth}
-                  placeholder="2025-11"
+                  onChangeText={(text) => handleMonthYearInput(text, setFirstPaymentMonth)}
+                  placeholder="11/2025"
+                  keyboardType="number-pad"
+                  maxLength={7}
                   className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900"
                   placeholderTextColor="#9ca3af"
+                />
+                {contractStartDate && !firstPaymentMonth && (
+                  <Text className="text-orange-600 text-xs mt-2">
+                    💡 Dica: Se fechou em 10/2025, normalmente o 1º pagamento é 11/2025
+                  </Text>
+                )}
+              </View>
                 />
                 {contractStartDate && !firstPaymentMonth && (
                   <Text className="text-orange-600 text-xs mt-2">
