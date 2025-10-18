@@ -346,26 +346,45 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
   
   addAgencyExpense: async (expense) => {
     const { userId } = get();
-    if (!userId) return;
+    console.log('🔍 addAgencyExpense - userId:', userId);
+    console.log('🔍 addAgencyExpense - expense:', expense);
+    
+    if (!userId) {
+      console.error('❌ userId não está definido!');
+      return;
+    }
     
     try {
-      const { error } = await supabase
-        .from('agency_expenses')
-        .insert({
-          id: expense.id,
-          user_id: userId,
-          description: expense.description,
-          value: expense.value,
-          // category removido temporariamente - precisa adicionar coluna no Supabase
-        });
+      const insertData = {
+        id: expense.id,
+        user_id: userId,
+        description: expense.description,
+        value: expense.value,
+        // category removido temporariamente - precisa adicionar coluna no Supabase
+      };
       
-      if (error) throw error;
+      console.log('📤 Enviando para Supabase:', insertData);
+      
+      const { data, error } = await supabase
+        .from('agency_expenses')
+        .insert(insertData)
+        .select();
+      
+      console.log('📥 Resposta Supabase - data:', data);
+      console.log('📥 Resposta Supabase - error:', error);
+      
+      if (error) {
+        console.error('❌ Erro do Supabase:', error);
+        throw error;
+      }
       
       set((state) => ({
         agencyExpenses: [...state.agencyExpenses, expense],
       }));
+      
+      console.log('✅ Despesa adicionada com sucesso!');
     } catch (error) {
-      console.error('Erro ao adicionar despesa:', error);
+      console.error('❌ Erro ao adicionar despesa:', error);
       throw error;
     }
   },
