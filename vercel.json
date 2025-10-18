@@ -2,7 +2,6 @@
   "buildCommand": "npm run build:web",
   "outputDirectory": "dist",
   "framework": null,
-  "installCommand": "npm install",
   "headers": [
     {
       "source": "/(.*)",
