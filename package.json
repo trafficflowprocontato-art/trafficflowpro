@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "expo export -p web",
-    "vercel-build": "expo export -p web"
+    "vercel-build": "echo 'Using pre-built dist/ - skipping build'"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
