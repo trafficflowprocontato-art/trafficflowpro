@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { Platform, View, useWindowDimensions } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Platform, useWindowDimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../state/authStore";
+import { useAppStore } from "../state/appStore";
 import Sidebar from "../components/Sidebar";
 import DashboardScreen from "../screens/DashboardScreen";
 import ClientsScreen from "../screens/ClientsScreen";
@@ -18,23 +21,110 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import PricingScreen from "../screens/PricingScreen";
 
 const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function DrawerNavigator() {
-  const { width } = useWindowDimensions();
-  const isDesktop = Platform.OS === 'web' && width >= 1024;
+// Bottom Tabs para Mobile
+function MobileTabNavigator() {
+  const theme = useAppStore((s) => s.theme);
+  const isDark = theme === "dark";
   
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: isDark ? "#1a1a1a" : "white",
+          borderTopWidth: 1,
+          borderTopColor: isDark ? "#374151" : "#e5e7eb",
+          paddingTop: 8,
+          height: 88,
+        },
+        tabBarActiveTintColor: "#3b82f6",
+        tabBarInactiveTintColor: isDark ? "#9ca3af" : "#6b7280",
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+          marginBottom: 8,
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarLabel: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="stats-chart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Clients"
+        component={ClientsScreen}
+        options={{
+          tabBarLabel: "Clientes",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Sellers"
+        component={SellersScreen}
+        options={{
+          tabBarLabel: "Vendedores",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cash" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Expenses"
+        component={ExpensesScreen}
+        options={{
+          tabBarLabel: "Despesas",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="wallet" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Payments"
+        component={PaymentsScreen}
+        options={{
+          tabBarLabel: "Cobranças",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="card" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Plans"
+        component={PricingScreen}
+        options={{
+          tabBarLabel: "Planos",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="diamond" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// Drawer com Sidebar para Desktop
+function DesktopDrawerNavigator() {
   return (
     <Drawer.Navigator
       drawerContent={(props) => <Sidebar {...props} currentRoute={props.state.routeNames[props.state.index]} />}
       screenOptions={{
         headerShown: false,
-        drawerType: isDesktop ? "permanent" : "front",
+        drawerType: "permanent",
         drawerStyle: {
           width: 260,
         },
-        overlayColor: "rgba(0,0,0,0.5)",
-        swipeEnabled: !isDesktop,
+        swipeEnabled: false,
       }}
     >
       <Drawer.Screen name="Dashboard" component={DashboardScreen} />
@@ -45,6 +135,16 @@ function DrawerNavigator() {
       <Drawer.Screen name="Plans" component={PricingScreen} />
     </Drawer.Navigator>
   );
+}
+
+// Navegador principal que escolhe entre Tabs ou Drawer
+function MainNavigator() {
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === 'web' && width >= 1024;
+  
+  // Desktop: Sidebar permanente
+  // Mobile: Bottom Tabs
+  return isDesktop ? <DesktopDrawerNavigator /> : <MobileTabNavigator />;
 }
 
 function AuthStack() {
@@ -71,7 +171,7 @@ function AppStack() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="Main" component={DrawerNavigator} />
+      <Stack.Screen name="Main" component={MainNavigator} />
       <Stack.Screen
         name="AddClient"
         component={AddClientScreen}
