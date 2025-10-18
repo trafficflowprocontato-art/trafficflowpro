@@ -104,6 +104,9 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
         sellerName: c.seller_name,
         sellerCommission: parseFloat(c.seller_commission),
         extraExpenses: c.extra_expenses || [],
+        lastPaymentMonth: c.last_payment_month || undefined,
+        contractStartDate: c.contract_start_date || undefined,
+        firstPaymentMonth: c.first_payment_month || undefined,
       }));
       
       const agencyExpenses: AgencyExpense[] = (expensesData || []).map((e: any) => ({
