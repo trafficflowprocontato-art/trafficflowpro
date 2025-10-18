@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
-import { Platform } from "react-native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { Platform, View, useWindowDimensions } from "react-native";
 import { useAuthStore } from "../state/authStore";
+import Sidebar from "../components/Sidebar";
 import DashboardScreen from "../screens/DashboardScreen";
 import ClientsScreen from "../screens/ClientsScreen";
 import ExpensesScreen from "../screens/ExpensesScreen";
@@ -17,90 +17,33 @@ import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import PricingScreen from "../screens/PricingScreen";
 
-const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
-function TabNavigator() {
+function DrawerNavigator() {
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === 'web' && width >= 1024;
+  
   return (
-    <Tab.Navigator
+    <Drawer.Navigator
+      drawerContent={(props) => <Sidebar {...props} currentRoute={props.state.routeNames[props.state.index]} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "white",
-          borderTopWidth: 1,
-          borderTopColor: "#e5e7eb",
-          paddingTop: 8,
-          height: 88,
+        drawerType: isDesktop ? "permanent" : "front",
+        drawerStyle: {
+          width: 260,
         },
-        tabBarActiveTintColor: "#3b82f6",
-        tabBarInactiveTintColor: "#9ca3af",
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "600",
-          marginBottom: 8,
-        },
+        overlayColor: "rgba(0,0,0,0.5)",
+        swipeEnabled: !isDesktop,
       }}
     >
-      <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{
-          tabBarLabel: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Clients"
-        component={ClientsScreen}
-        options={{
-          tabBarLabel: "Clientes",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Sellers"
-        component={SellersScreen}
-        options={{
-          tabBarLabel: "Vendedores",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cash" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Expenses"
-        component={ExpensesScreen}
-        options={{
-          tabBarLabel: "Despesas",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="wallet" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Payments"
-        component={PaymentsScreen}
-        options={{
-          tabBarLabel: "Cobranças",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="card" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Plans"        component={PricingScreen}
-        options={{
-          tabBarLabel: "Planos",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="diamond" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tab.Navigator>
+      <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+      <Drawer.Screen name="Clients" component={ClientsScreen} />
+      <Drawer.Screen name="Sellers" component={SellersScreen} />
+      <Drawer.Screen name="Expenses" component={ExpensesScreen} />
+      <Drawer.Screen name="Payments" component={PaymentsScreen} />
+      <Drawer.Screen name="Plans" component={PricingScreen} />
+    </Drawer.Navigator>
   );
 }
 
@@ -128,7 +71,7 @@ function AppStack() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="Main" component={TabNavigator} />
+      <Stack.Screen name="Main" component={DrawerNavigator} />
       <Stack.Screen
         name="AddClient"
         component={AddClientScreen}

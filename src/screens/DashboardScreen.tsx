@@ -4,7 +4,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFinancialStore } from "../state/financialStore";
 import { useAuthStore } from "../state/authStore";
+import { useAppStore } from "../state/appStore";
 import WebContainer from "../components/WebContainer";
+import MoneyDisplay from "../components/MoneyDisplay";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -19,7 +21,10 @@ export default function DashboardScreen() {
   const logout = useAuthStore((s) => s.logout);
   const trialInfo = useAuthStore((s) => s.trialInfo);
   const calculateTrialInfo = useAuthStore((s) => s.calculateTrialInfo);
+  const theme = useAppStore((s) => s.theme);
   const [selectedMonth, setSelectedMonth] = React.useState<string>("total"); // "total" ou "2025-10"
+  
+  const isDark = theme === "dark";
   
   // Calcular trial info ao montar componente
   React.useEffect(() => {
