@@ -25,6 +25,9 @@ export default function DashboardScreen() {
   const [selectedMonth, setSelectedMonth] = React.useState<string>("total"); // "total" ou "2025-10"
   
   const isDark = theme === "dark";
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
+  const hideValues = useAppStore((s) => s.hideValues);
+  const toggleHideValues = useAppStore((s) => s.toggleHideValues);
   
   // Calcular trial info ao montar componente
   React.useEffect(() => {
@@ -133,39 +136,64 @@ export default function DashboardScreen() {
 
   // Desktop Layout Component
   const DesktopDashboard = () => (
-    <View className="flex-1 bg-gray-50">
+    <View className={`flex-1 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
       <ScrollView 
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header Desktop */}
-        <View className="bg-white border-b border-gray-200 px-8 py-6">
+        <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-b px-8 py-6`}>
           <View className="max-w-7xl mx-auto w-full flex-row justify-between items-center">
             <View>
-              <Text className="text-3xl font-bold text-gray-900">Dashboard</Text>
-              <Text className="text-gray-500 mt-1">Bem-vindo, {user?.name || "Usuário"}! 👋</Text>
+              <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Dashboard</Text>
+              <Text className={`${isDark ? "text-gray-400" : "text-gray-500"} mt-1`}>Bem-vindo, {user?.name || "Usuário"}! 👋</Text>
             </View>
-            <Pressable
-              onPress={handleLogout}
-              className="flex-row items-center gap-2 px-4 py-2 bg-red-50 rounded-xl border border-red-200"
-            >
-              <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-              <Text className="text-red-600 font-semibold">Sair</Text>
-            </Pressable>
+            <View className="flex-row items-center gap-3">
+              {/* Toggle de Visibilidade de Valores */}
+              <Pressable
+                onPress={toggleHideValues}
+                className={`flex-row items-center gap-2 px-4 py-2 ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"} rounded-xl border`}
+              >
+                <Ionicons name={hideValues ? "eye-off" : "eye"} size={20} color={isDark ? "#9ca3af" : "#6b7280"} />
+                <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold`}>
+                  {hideValues ? "Mostrar" : "Ocultar"}
+                </Text>
+              </Pressable>
+              
+              {/* Toggle de Tema */}
+              <Pressable
+                onPress={toggleTheme}
+                className={`flex-row items-center gap-2 px-4 py-2 ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"} rounded-xl border`}
+              >
+                <Ionicons name={isDark ? "sunny" : "moon"} size={20} color={isDark ? "#fbbf24" : "#6b7280"} />
+                <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold`}>
+                  {isDark ? "Claro" : "Escuro"}
+                </Text>
+              </Pressable>
+              
+              {/* Botão Sair */}
+              <Pressable
+                onPress={handleLogout}
+                className="flex-row items-center gap-2 px-4 py-2 bg-red-50 rounded-xl border border-red-200"
+              >
+                <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+                <Text className="text-red-600 font-semibold">Sair</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
 
         {/* Seletor de Mês */}
-        <View className="bg-white border-b border-gray-100 px-8 py-4">
+        <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} border-b px-8 py-4`}>
           <View className="max-w-7xl mx-auto w-full">
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-2">
                 <Pressable
                   onPress={() => setSelectedMonth("total")}
-                  className={`px-4 py-2 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : "bg-gray-100"}`}
+                  className={`px-4 py-2 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : isDark ? "bg-gray-700" : "bg-gray-100"}`}
                 >
-                  <Text className={`font-semibold ${selectedMonth === "total" ? "text-white" : "text-gray-700"}`}>
+                  <Text className={`font-semibold ${selectedMonth === "total" ? "text-white" : isDark ? "text-gray-300" : "text-gray-700"}`}>
                     📊 Total (Tudo)
                   </Text>
                 </Pressable>
@@ -174,9 +202,9 @@ export default function DashboardScreen() {
                   <Pressable
                     key={month.key}
                     onPress={() => setSelectedMonth(month.key)}
-                    className={`px-4 py-2 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : "bg-gray-100"}`}
+                    className={`px-4 py-2 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : isDark ? "bg-gray-700" : "bg-gray-100"}`}
                   >
-                    <Text className={`font-semibold ${selectedMonth === month.key ? "text-white" : "text-gray-700"}`}>
+                    <Text className={`font-semibold ${selectedMonth === month.key ? "text-white" : isDark ? "text-gray-300" : "text-gray-700"}`}>
                       {month.label}
                     </Text>
                   </Pressable>
@@ -231,12 +259,12 @@ export default function DashboardScreen() {
           {/* Cards Grid - 3 colunas */}
           <View className="flex-row gap-6 mb-8">
             {/* Card Lucro Líquido */}
-            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+            <View className={`flex-1 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl p-6 shadow-lg border`}>
               <View className="flex-row items-center mb-4">
                 <View className="w-12 h-12 bg-green-100 rounded-xl items-center justify-center mr-3">
                   <Ionicons name="trending-up" size={24} color="#10b981" />
                 </View>
-                <Text className="text-gray-600 text-sm font-semibold">LUCRO LÍQUIDO</Text>
+                <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-sm font-semibold`}>LUCRO LÍQUIDO</Text>
               </View>
               <MoneyDisplay 
                 value={filteredSummary.netProfit} 
@@ -244,43 +272,43 @@ export default function DashboardScreen() {
                 color="#10b981"
                 showToggle={true}
               />
-              <Text className="text-gray-500 text-sm">
+              <Text className={`${isDark ? "text-gray-500" : "text-gray-500"} text-sm`}>
                 Receita: <MoneyDisplay value={filteredSummary.totalRevenue} size="sm" />
               </Text>
             </View>
 
             {/* Card Receita Total */}
-            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+            <View className={`flex-1 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl p-6 shadow-lg border`}>
               <View className="flex-row items-center mb-4">
                 <View className="w-12 h-12 bg-blue-100 rounded-xl items-center justify-center mr-3">
                   <Ionicons name="cash" size={24} color="#3b82f6" />
                 </View>
-                <Text className="text-gray-600 text-sm font-semibold">RECEITA TOTAL</Text>
+                <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-sm font-semibold`}>RECEITA TOTAL</Text>
               </View>
               <MoneyDisplay 
                 value={filteredSummary.totalRevenue} 
                 size="xl" 
                 color="#3b82f6"
               />
-              <Text className="text-gray-500 text-sm">
+              <Text className={`${isDark ? "text-gray-500" : "text-gray-500"} text-sm`}>
                 {clients.length} {clients.length === 1 ? "cliente" : "clientes"}
               </Text>
             </View>
 
             {/* Card Despesas */}
-            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+            <View className={`flex-1 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl p-6 shadow-lg border`}>
               <View className="flex-row items-center mb-4">
                 <View className="w-12 h-12 bg-red-100 rounded-xl items-center justify-center mr-3">
                   <Ionicons name="wallet" size={24} color="#ef4444" />
                 </View>
-                <Text className="text-gray-600 text-sm font-semibold">DESPESAS TOTAIS</Text>
+                <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-sm font-semibold`}>DESPESAS TOTAIS</Text>
               </View>
               <MoneyDisplay 
                 value={filteredSummary.totalExpenses} 
                 size="xl" 
                 color="#ef4444"
               />
-              <Text className="text-gray-500 text-sm">
+              <Text className={`${isDark ? "text-gray-500" : "text-gray-500"} text-sm`}>
                 Comissões + Despesas
               </Text>
             </View>
@@ -288,30 +316,30 @@ export default function DashboardScreen() {
 
           {/* Status de Pagamentos - Grid 3 colunas */}
           <View className="mb-8">
-            <Text className="text-xl font-bold text-gray-900 mb-4">Status de Pagamentos</Text>
+            <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"} mb-4`}>Status de Pagamentos</Text>
             <View className="flex-row gap-6">
-              <View className="flex-1 bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+              <View className={`flex-1 ${isDark ? "bg-green-900/30 border-green-700" : "bg-green-50 border-green-200"} rounded-2xl p-6 border-2`}>
                 <View className="flex-row items-center mb-3">
                   <Ionicons name="checkmark-circle" size={24} color="#10b981" />
                   <Text className="text-green-700 font-semibold ml-2">PAGOS</Text>
                 </View>
-                <Text className="text-green-900 text-5xl font-bold">{filteredPaidClients}</Text>
+                <Text className={`${isDark ? "text-green-400" : "text-green-900"} text-5xl font-bold`}>{filteredPaidClients}</Text>
               </View>
 
-              <View className="flex-1 bg-yellow-50 rounded-2xl p-6 border-2 border-yellow-200">
+              <View className={`flex-1 ${isDark ? "bg-yellow-900/30 border-yellow-700" : "bg-yellow-50 border-yellow-200"} rounded-2xl p-6 border-2`}>
                 <View className="flex-row items-center mb-3">
                   <Ionicons name="time" size={24} color="#f59e0b" />
                   <Text className="text-yellow-700 font-semibold ml-2">PENDENTES</Text>
                 </View>
-                <Text className="text-yellow-900 text-5xl font-bold">{pendingClients}</Text>
+                <Text className={`${isDark ? "text-yellow-400" : "text-yellow-900"} text-5xl font-bold`}>{pendingClients}</Text>
               </View>
 
-              <View className="flex-1 bg-red-50 rounded-2xl p-6 border-2 border-red-200">
+              <View className={`flex-1 ${isDark ? "bg-red-900/30 border-red-700" : "bg-red-50 border-red-200"} rounded-2xl p-6 border-2`}>
                 <View className="flex-row items-center mb-3">
                   <Ionicons name="alert-circle" size={24} color="#ef4444" />
                   <Text className="text-red-700 font-semibold ml-2">ATRASADOS</Text>
                 </View>
-                <Text className="text-red-900 text-5xl font-bold">{overdueClients}</Text>
+                <Text className={`${isDark ? "text-red-400" : "text-red-900"} text-5xl font-bold`}>{overdueClients}</Text>
               </View>
             </View>
           </View>
@@ -319,26 +347,26 @@ export default function DashboardScreen() {
           {/* Resumo Financeiro - Grid 2 colunas */}
           <View className="flex-row gap-6">
             {/* Coluna Esquerda */}
-            <View className="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-              <Text className="text-xl font-bold text-gray-900 mb-6">Resumo Financeiro</Text>
+            <View className={`flex-1 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl p-6 shadow-lg border`}>
+              <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"} mb-6`}>Resumo Financeiro</Text>
               
               <View className="space-y-4">
-                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                <View className={`flex-row items-center justify-between py-4 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
                   <View className="flex-row items-center">
                     <View className="w-10 h-10 bg-green-100 rounded-lg items-center justify-center mr-3">
                       <Ionicons name="arrow-down" size={20} color="#10b981" />
                     </View>
-                    <Text className="text-gray-700 font-medium">Receita Total</Text>
+                    <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Receita Total</Text>
                   </View>
                   <MoneyDisplay value={filteredSummary.totalRevenue} size="lg" color="#059669" />
                 </View>
 
-                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                <View className={`flex-row items-center justify-between py-4 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
                   <View className="flex-row items-center">
                     <View className="w-10 h-10 bg-orange-100 rounded-lg items-center justify-center mr-3">
                       <Ionicons name="people" size={20} color="#f97316" />
                     </View>
-                    <Text className="text-gray-700 font-medium">Comissões</Text>
+                    <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Comissões</Text>
                   </View>
                   <View className="flex-row items-center">
                     <Text className="text-orange-600 text-xl font-bold mr-1">-</Text>
@@ -346,12 +374,12 @@ export default function DashboardScreen() {
                   </View>
                 </View>
 
-                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                <View className={`flex-row items-center justify-between py-4 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
                   <View className="flex-row items-center">
                     <View className="w-10 h-10 bg-purple-100 rounded-lg items-center justify-center mr-3">
                       <Ionicons name="cart" size={20} color="#a855f7" />
                     </View>
-                    <Text className="text-gray-700 font-medium">Despesas Extras</Text>
+                    <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Despesas Extras</Text>
                   </View>
                   <View className="flex-row items-center">
                     <Text className="text-purple-600 text-xl font-bold mr-1">-</Text>
@@ -359,12 +387,12 @@ export default function DashboardScreen() {
                   </View>
                 </View>
 
-                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                <View className={`flex-row items-center justify-between py-4 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
                   <View className="flex-row items-center">
                     <View className="w-10 h-10 bg-blue-100 rounded-lg items-center justify-center mr-3">
                       <Ionicons name="business" size={20} color="#3b82f6" />
                     </View>
-                    <Text className="text-gray-700 font-medium">Despesas da Agência</Text>
+                    <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Despesas da Agência</Text>
                   </View>
                   <View className="flex-row items-center">
                     <Text className="text-blue-600 text-xl font-bold mr-1">-</Text>
@@ -377,7 +405,7 @@ export default function DashboardScreen() {
                     <View className="w-10 h-10 bg-red-100 rounded-lg items-center justify-center mr-3">
                       <Ionicons name="arrow-up" size={20} color="#ef4444" />
                     </View>
-                    <Text className="text-gray-700 font-medium">Total de Despesas</Text>
+                    <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Total de Despesas</Text>
                   </View>
                   <View className="flex-row items-center">
                     <Text className="text-red-600 text-xl font-bold mr-1">-</Text>
@@ -386,9 +414,9 @@ export default function DashboardScreen() {
                 </View>
               </View>
 
-              <View className="bg-green-50 rounded-xl p-6 mt-6 border-2 border-green-200">
+              <View className={`${isDark ? "bg-green-900/30 border-green-700" : "bg-green-50 border-green-200"} rounded-xl p-6 mt-6 border-2`}>
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-gray-700 text-lg font-bold">Lucro Líquido</Text>
+                  <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} text-lg font-bold`}>Lucro Líquido</Text>
                   <MoneyDisplay value={filteredSummary.netProfit} size="xl" color="#059669" />
                 </View>
               </View>
@@ -396,28 +424,28 @@ export default function DashboardScreen() {
 
             {/* Coluna Direita - Estatísticas Rápidas */}
             <View className="flex-1 space-y-6">
-              <View className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-                <Text className="text-lg font-bold text-gray-900 mb-4">📊 Estatísticas</Text>
+              <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl p-6 shadow-lg border`}>
+                <Text className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"} mb-4`}>📊 Estatísticas</Text>
                 
                 <View className="space-y-4">
                   <View>
-                    <Text className="text-gray-500 text-sm mb-1">Total de Clientes</Text>
-                    <Text className="text-gray-900 text-2xl font-bold">{clients.length}</Text>
+                    <Text className={`${isDark ? "text-gray-500" : "text-gray-500"} text-sm mb-1`}>Total de Clientes</Text>
+                    <Text className={`${isDark ? "text-white" : "text-gray-900"} text-2xl font-bold`}>{clients.length}</Text>
                   </View>
                   
                   <View>
-                    <Text className="text-gray-500 text-sm mb-1">Despesas da Agência</Text>
-                    <Text className="text-gray-900 text-2xl font-bold">{agencyExpenses.length}</Text>
+                    <Text className={`${isDark ? "text-gray-500" : "text-gray-500"} text-sm mb-1`}>Despesas da Agência</Text>
+                    <Text className={`${isDark ? "text-white" : "text-gray-900"} text-2xl font-bold`}>{agencyExpenses.length}</Text>
                   </View>
                   
                   <View>
-                    <Text className="text-gray-500 text-sm mb-1">Comissões Registradas</Text>
-                    <Text className="text-gray-900 text-2xl font-bold">{sellerCommissions.length}</Text>
+                    <Text className={`${isDark ? "text-gray-500" : "text-gray-500"} text-sm mb-1`}>Comissões Registradas</Text>
+                    <Text className={`${isDark ? "text-white" : "text-gray-900"} text-2xl font-bold`}>{sellerCommissions.length}</Text>
                   </View>
                 </View>
               </View>
 
-              <View className="bg-blue-500 rounded-2xl p-6 shadow-lg">
+              <View className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg">
                 <Ionicons name="rocket" size={32} color="white" />
                 <Text className="text-white text-xl font-bold mt-4 mb-2">Melhore seus Resultados</Text>
                 <Text className="text-blue-100 text-sm mb-4">Explore todas as funcionalidades do TrafficFlow Pro</Text>
@@ -436,7 +464,7 @@ export default function DashboardScreen() {
   const MobileDashboard = () => (
     <WebContainer>
       <ScrollView 
-        className="flex-1 bg-gray-50"
+        className={`flex-1 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
       >
       <View style={{ paddingTop: insets.top + 20 }} className="px-6">
@@ -475,14 +503,14 @@ export default function DashboardScreen() {
           </View>
         )}
         
-        {/* Header with User Info and Logout */}
+        {/* Header with User Info and Controls */}
         <View className="mb-8">
           <View className="flex-row justify-between items-start mb-4">
             <View className="flex-1">
-              <Text className="text-3xl font-bold text-gray-900 mb-1">
+              <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"} mb-1`}>
                 TrafficFlow Pro
               </Text>
-              <Text className="text-base text-gray-500">
+              <Text className={`text-base ${isDark ? "text-gray-400" : "text-gray-500"}`}>
                 Olá, {user?.name || "Usuário"}!
               </Text>
             </View>
@@ -493,10 +521,33 @@ export default function DashboardScreen() {
               <Ionicons name="log-out-outline" size={22} color="#ef4444" />
             </Pressable>
           </View>
+          
+          {/* Controles de Tema e Visibilidade */}
+          <View className="flex-row gap-3 mb-4">
+            <Pressable
+              onPress={toggleHideValues}
+              className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-xl border`}
+            >
+              <Ionicons name={hideValues ? "eye-off" : "eye"} size={18} color={isDark ? "#9ca3af" : "#6b7280"} />
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold text-sm`}>
+                {hideValues ? "Mostrar" : "Ocultar"}
+              </Text>
+            </Pressable>
+            
+            <Pressable
+              onPress={toggleTheme}
+              className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-xl border`}
+            >
+              <Ionicons name={isDark ? "sunny" : "moon"} size={18} color={isDark ? "#fbbf24" : "#6b7280"} />
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold text-sm`}>
+                {isDark ? "Claro" : "Escuro"}
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Lucro Líquido Card */}
-        <View className="bg-white rounded-3xl p-6 mb-6 shadow-lg border border-gray-200">
+        <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-3xl p-6 mb-6 shadow-lg border`}>
           <View className="flex-row items-center mb-2">
             <Ionicons name="trending-up" size={24} color="#3b82f6" />
             <Text className="text-blue-600 text-base ml-2 font-medium">
@@ -516,14 +567,14 @@ export default function DashboardScreen() {
 
         {/* Seletor de Mês Mobile */}
         <View className="mb-6">
-          <Text className="text-gray-700 font-semibold mb-3 text-sm">Filtrar por período:</Text>
+          <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold mb-3 text-sm`}>Filtrar por período:</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-2">
               <Pressable
                 onPress={() => setSelectedMonth("total")}
-                className={`px-4 py-3 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : "bg-white border border-gray-300"}`}
+                className={`px-4 py-3 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : isDark ? "bg-gray-800 border border-gray-700" : "bg-white border border-gray-300"}`}
               >
-                <Text className={`font-semibold text-sm ${selectedMonth === "total" ? "text-white" : "text-gray-700"}`}>
+                <Text className={`font-semibold text-sm ${selectedMonth === "total" ? "text-white" : isDark ? "text-gray-300" : "text-gray-700"}`}>
                   📊 Total
                 </Text>
               </Pressable>
@@ -532,9 +583,9 @@ export default function DashboardScreen() {
                 <Pressable
                   key={month.key}
                   onPress={() => setSelectedMonth(month.key)}
-                  className={`px-4 py-3 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : "bg-white border border-gray-300"}`}
+                  className={`px-4 py-3 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : isDark ? "bg-gray-800 border border-gray-700" : "bg-white border border-gray-300"}`}
                 >
-                  <Text className={`font-semibold text-sm ${selectedMonth === month.key ? "text-white" : "text-gray-700"}`}>
+                  <Text className={`font-semibold text-sm ${selectedMonth === month.key ? "text-white" : isDark ? "text-gray-300" : "text-gray-700"}`}>
                     {month.label.split(' ')[0]}
                   </Text>
                 </Pressable>
@@ -545,79 +596,79 @@ export default function DashboardScreen() {
 
         {/* Status dos Clientes */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-3">
+          <Text className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"} mb-3`}>
             Status de Pagamentos
           </Text>
           <View className="flex-row gap-3">
-            <View className="flex-1 bg-green-50 rounded-2xl p-4 border border-green-100">
+            <View className={`flex-1 ${isDark ? "bg-green-900/30 border-green-700" : "bg-green-50 border-green-100"} rounded-2xl p-4 border`}>
               <View className="flex-row items-center mb-1">
                 <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
                 <Text className="text-green-700 text-xs font-medium">PAGOS</Text>
               </View>
-              <Text className="text-green-900 text-2xl font-bold">{filteredPaidClients}</Text>
+              <Text className={`${isDark ? "text-green-400" : "text-green-900"} text-2xl font-bold`}>{filteredPaidClients}</Text>
             </View>
             
-            <View className="flex-1 bg-yellow-50 rounded-2xl p-4 border border-yellow-100">
+            <View className={`flex-1 ${isDark ? "bg-yellow-900/30 border-yellow-700" : "bg-yellow-50 border-yellow-100"} rounded-2xl p-4 border`}>
               <View className="flex-row items-center mb-1">
                 <View className="w-2 h-2 rounded-full bg-yellow-500 mr-2" />
                 <Text className="text-yellow-700 text-xs font-medium">PENDENTES</Text>
               </View>
-              <Text className="text-yellow-900 text-2xl font-bold">{pendingClients}</Text>
+              <Text className={`${isDark ? "text-yellow-400" : "text-yellow-900"} text-2xl font-bold`}>{pendingClients}</Text>
             </View>
             
-            <View className="flex-1 bg-red-50 rounded-2xl p-4 border border-red-100">
+            <View className={`flex-1 ${isDark ? "bg-red-900/30 border-red-700" : "bg-red-50 border-red-100"} rounded-2xl p-4 border`}>
               <View className="flex-row items-center mb-1">
                 <View className="w-2 h-2 rounded-full bg-red-500 mr-2" />
                 <Text className="text-red-700 text-xs font-medium">ATRASADOS</Text>
               </View>
-              <Text className="text-red-900 text-2xl font-bold">{overdueClients}</Text>
+              <Text className={`${isDark ? "text-red-400" : "text-red-900"} text-2xl font-bold`}>{overdueClients}</Text>
             </View>
           </View>
         </View>
 
         {/* Resumo Financeiro Detalhado */}
-        <View className="bg-white rounded-3xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
+        <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-3xl p-6 mb-6 shadow-sm border`}>
+          <Text className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"} mb-4`}>
             Resumo Financeiro
           </Text>
           
           {/* Debug Info - Remover depois */}
-          <View className="bg-gray-100 rounded-xl p-3 mb-3">
-            <Text className="text-gray-700 text-xs font-medium mb-1">
+          <View className={`${isDark ? "bg-gray-700" : "bg-gray-100"} rounded-xl p-3 mb-3`}>
+            <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} text-xs font-medium mb-1`}>
               📊 Debug Info:
             </Text>
-            <Text className="text-gray-600 text-xs">
+            <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-xs`}>
               Clientes: {clients.length} | Despesas Agência: {agencyExpenses.length}
             </Text>
-            <Text className="text-gray-600 text-xs">
+            <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-xs`}>
               Total Despesas Agência: <MoneyDisplay value={summary.totalAgencyExpenses} size="sm" />
             </Text>
-            <Text className="text-gray-600 text-xs">
+            <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-xs`}>
               Comissões Totais: {sellerCommissions.length} | Pagas: {sellerCommissions.filter((c) => c.paymentStatus === "paid").length}
             </Text>
-            <Text className="text-gray-600 text-xs">
+            <Text className={`${isDark ? "text-gray-400" : "text-gray-600"} text-xs`}>
               Total Comissões Pagas: <MoneyDisplay value={filteredSummary.totalCommissions} size="sm" />
             </Text>
           </View>
           
           {/* Receita */}
-          <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <View className={`flex-row justify-between items-center py-3 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="arrow-down" size={20} color="#22c55e" />
               </View>
-              <Text className="text-gray-700 font-medium">Receita Total</Text>
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Receita Total</Text>
             </View>
             <MoneyDisplay value={filteredSummary.totalRevenue} size="md" color="#059669" />
           </View>
 
           {/* Comissões */}
-          <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <View className={`flex-row justify-between items-center py-3 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="people" size={20} color="#f97316" />
               </View>
-              <Text className="text-gray-700 font-medium">Comissões</Text>
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Comissões</Text>
             </View>
             <View className="flex-row items-center">
               <Text className="text-orange-600 font-semibold text-base mr-1">-</Text>
@@ -626,12 +677,12 @@ export default function DashboardScreen() {
           </View>
 
           {/* Despesas Extras */}
-          <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <View className={`flex-row justify-between items-center py-3 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-purple-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="cash" size={20} color="#a855f7" />
               </View>
-              <Text className="text-gray-700 font-medium">Despesas Extras</Text>
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Despesas Extras</Text>
             </View>
             <View className="flex-row items-center">
               <Text className="text-purple-600 font-semibold text-base mr-1">-</Text>
@@ -640,12 +691,12 @@ export default function DashboardScreen() {
           </View>
 
           {/* Despesas da Agência */}
-          <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <View className={`flex-row justify-between items-center py-3 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="business" size={20} color="#3b82f6" />
               </View>
-              <Text className="text-gray-700 font-medium">Despesas da Agência</Text>
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Despesas da Agência</Text>
             </View>
             <View className="flex-row items-center">
               <Text className="text-blue-600 font-semibold text-base mr-1">-</Text>
@@ -654,12 +705,12 @@ export default function DashboardScreen() {
           </View>
 
           {/* Total de Despesas */}
-          <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <View className={`flex-row justify-between items-center py-3 border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="arrow-up" size={20} color="#ef4444" />
               </View>
-              <Text className="text-gray-700 font-medium">Total de Despesas</Text>
+              <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-medium`}>Total de Despesas</Text>
             </View>
             <View className="flex-row items-center">
               <Text className="text-red-600 font-semibold text-base mr-1">-</Text>
@@ -669,7 +720,7 @@ export default function DashboardScreen() {
 
           {/* Lucro Líquido */}
           <View className="flex-row justify-between items-center pt-4">
-            <Text className="text-gray-900 font-bold text-base">Lucro Líquido</Text>
+            <Text className={`${isDark ? "text-white" : "text-gray-900"} font-bold text-base`}>Lucro Líquido</Text>
             <MoneyDisplay 
               value={filteredSummary.netProfit} 
               size="lg" 
