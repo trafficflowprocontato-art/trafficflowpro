@@ -91,7 +91,7 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
         id: e.id,
         description: e.description,
         value: parseFloat(e.value),
-        category: e.category || "Geral",
+        category: "Geral", // Hardcoded até adicionar coluna no Supabase
       }));
       
       const sellerCommissions: SellerCommissionRecord[] = (commissionsData || []).map((c: any) => ({
@@ -356,7 +356,7 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
           user_id: userId,
           description: expense.description,
           value: expense.value,
-          category: expense.category || "Geral",
+          // category removido temporariamente - precisa adicionar coluna no Supabase
         });
       
       if (error) throw error;
@@ -378,7 +378,7 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
       const updateData: any = {};
       if (updatedExpense.description) updateData.description = updatedExpense.description;
       if (updatedExpense.value !== undefined) updateData.value = updatedExpense.value;
-      if (updatedExpense.category) updateData.category = updatedExpense.category;
+      // category removido temporariamente - precisa adicionar coluna no Supabase
       
       const { error } = await supabase
         .from('agency_expenses')
