@@ -118,17 +118,33 @@ export default function ClientsScreen() {
     <WebContainer>
       <View className="flex-1 bg-gray-50">
       <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
       >
         <View style={{ paddingTop: insets.top + 20 }} className="px-6">
           {/* Header */}
           <View className="mb-6">
-            <Text className="text-3xl font-bold text-gray-900 mb-1">
-              Clientes
-            </Text>
-            <Text className="text-base text-gray-500">
-              {clients.length} {clients.length === 1 ? "cliente" : "clientes"} cadastrados
-            </Text>
+            <View className="flex-row justify-between items-center mb-2">
+              <View className="flex-1">
+                <Text className="text-3xl font-bold text-gray-900 mb-1">
+                  Clientes
+                </Text>
+                <Text className="text-base text-gray-500">
+                  {clients.length} {clients.length === 1 ? "cliente" : "clientes"} cadastrados
+                </Text>
+              </View>
+              <Pressable
+                onPress={handleAddClient}
+                className={`px-5 py-3 rounded-xl flex-row items-center shadow-sm ${
+                  isReadOnly ? "bg-gray-400" : "bg-blue-500 active:bg-blue-600"
+                }`}
+                disabled={isReadOnly}
+              >
+                <Ionicons name="add-circle" size={20} color="white" />
+                <Text className="text-white font-semibold text-sm ml-2">
+                  {isReadOnly ? "Assinar" : "Novo Cliente"}
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* Empty State */}
@@ -271,25 +287,6 @@ export default function ClientsScreen() {
           )}
         </View>
       </ScrollView>
-
-      {/* Floating Add Button */}
-      <View
-        className="absolute bottom-0 left-0 right-0 px-6"
-        style={{ paddingBottom: insets.bottom + 90 }}
-      >
-        <Pressable
-          onPress={handleAddClient}
-          className={`py-4 rounded-2xl flex-row items-center justify-center shadow-lg ${
-            isReadOnly ? "bg-gray-400" : "bg-blue-500 active:bg-blue-600"
-          }`}
-          disabled={isReadOnly}
-        >
-          <Ionicons name="add-circle" size={24} color="white" />
-          <Text className="text-white font-bold text-base ml-2">
-            {isReadOnly ? "Assine para Adicionar" : "Adicionar Cliente"}
-          </Text>
-        </Pressable>
-      </View>
     </View>
     </WebContainer>
   );
