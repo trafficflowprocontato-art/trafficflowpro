@@ -128,31 +128,51 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
   
   addClient: async (client) => {
     const { userId } = get();
-    if (!userId) return;
+    console.log('🔍 addClient - userId:', userId);
+    console.log('🔍 addClient - client:', client);
+    
+    if (!userId) {
+      console.error('❌ userId não está definido em addClient!');
+      return;
+    }
     
     try {
-      // Salvar no Supabase
-      const { error } = await supabase
-        .from('clients')
-        .insert({
-          id: client.id,
-          user_id: userId,
-          name: client.name,
-          monthly_value: client.monthlyValue,
-          payment_status: client.paymentStatus,
-          payment_date: client.paymentDate,
-          seller_name: client.sellerName,
-          seller_commission: client.sellerCommission,
-          extra_expenses: client.extraExpenses,
-        });
+      const insertData = {
+        id: client.id,
+        user_id: userId,
+        name: client.name,
+        monthly_value: client.monthlyValue,
+        payment_status: client.paymentStatus,
+        payment_date: client.paymentDate,
+        seller_name: client.sellerName,
+        seller_commission: client.sellerCommission,
+        extra_expenses: client.extraExpenses,
+      };
       
-      if (error) throw error;
+      console.log('📤 Enviando cliente para Supabase:', insertData);
+      
+      // Salvar no Supabase
+      const { data, error } = await supabase
+        .from('clients')
+        .insert(insertData)
+        .select();
+      
+      console.log('📥 Resposta Supabase (cliente) - data:', data);
+      console.log('📥 Resposta Supabase (cliente) - error:', error);
+      
+      if (error) {
+        console.error('❌ Erro do Supabase ao inserir cliente:', error);
+        throw error;
+      }
+      
+      console.log('✅ Cliente inserido com sucesso no Supabase!');
       
       // Atualizar estado local
       set((state) => ({ clients: [...state.clients, client] }));
       
       // Se o cliente está pago, criar comissão automaticamente
       if (client.paymentStatus === "paid") {
+        console.log('💰 Cliente pago - criando comissão automaticamente...');
         const now = new Date();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
         
@@ -166,28 +186,46 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
           month: currentMonth,
         };
         
+        console.log('📤 Criando comissão:', newCommission);
+        
         await get().updateCommissionStatus(newCommission.id, "pending");
         
+        const commissionInsertData = {
+          id: newCommission.id,
+          user_id: userId,
+          client_id: newCommission.clientId,
+          client_name: newCommission.clientName,
+          seller_name: newCommission.sellerName,
+          commission_value: newCommission.commissionValue,
+          payment_status: newCommission.paymentStatus,
+          month: newCommission.month,
+        };
+        
+        console.log('📤 Enviando comissão para Supabase:', commissionInsertData);
+        
         // Salvar comissão no Supabase
-        await supabase
+        const { data: commData, error: commError } = await supabase
           .from('seller_commissions')
-          .insert({
-            id: newCommission.id,
-            user_id: userId,
-            client_id: newCommission.clientId,
-            client_name: newCommission.clientName,
-            seller_name: newCommission.sellerName,
-            commission_value: newCommission.commissionValue,
-            payment_status: newCommission.paymentStatus,
-            month: newCommission.month,
-          });
+          .insert(commissionInsertData)
+          .select();
+        
+        console.log('📥 Resposta Supabase (comissão) - data:', commData);
+        console.log('📥 Resposta Supabase (comissão) - error:', commError);
+        
+        if (commError) {
+          console.error('❌ Erro ao criar comissão:', commError);
+          throw commError;
+        }
         
         set((state) => ({
           sellerCommissions: [...state.sellerCommissions, newCommission],
         }));
+        
+        console.log('✅ Comissão criada com sucesso!');
       }
     } catch (error) {
-      console.error('Erro ao adicionar cliente:', error);
+      console.error('❌ Erro ao adicionar cliente:', error);
+      console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2));
       throw error;
     }
   },

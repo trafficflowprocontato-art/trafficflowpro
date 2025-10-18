@@ -179,7 +179,7 @@ export default function AddClientScreen() {
     setExtraExpenses(extraExpenses.filter((exp) => exp.id !== id));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("🔵 handleSave chamado");
     setValidationError("");
     
@@ -234,22 +234,35 @@ export default function AddClientScreen() {
 
       if (isEditing) {
         console.log("🔵 Atualizando cliente...");
-        updateClient(clientData.id, clientData);
+        await updateClient(clientData.id, clientData);
       } else {
         console.log("🔵 Adicionando cliente...");
-        addClient(clientData);
+        await addClient(clientData);
       }
 
-      console.log("✅ Cliente salvo, voltando...");
-      
-      // Pequeno delay para garantir que o estado foi atualizado
-      setTimeout(() => {
-        setIsSaving(false);
-        navigation.goBack();
-      }, 100);
+      console.log("✅ Cliente salvo com sucesso!");
+      setIsSaving(false);
+      navigation.goBack();
     } catch (error) {
       console.error("❌ Erro ao salvar cliente:", error);
-      setValidationError("Erro ao salvar cliente. Tente novamente.");
+      console.error("❌ Stack trace:", error instanceof Error ? error.stack : "N/A");
+      
+      // Extrair mensagem de erro específica do Supabase
+      let errorMessage = "Erro ao salvar cliente. Tente novamente.";
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.message) {
+          errorMessage = `Erro: ${err.message}`;
+        }
+        if (err.details) {
+          errorMessage += `\nDetalhes: ${err.details}`;
+        }
+        if (err.hint) {
+          errorMessage += `\nDica: ${err.hint}`;
+        }
+      }
+      
+      setValidationError(errorMessage);
       setIsSaving(false);
     }
   };
