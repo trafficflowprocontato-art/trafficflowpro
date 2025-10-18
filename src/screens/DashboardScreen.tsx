@@ -2,12 +2,14 @@ import React from "react";
 import { View, Text, ScrollView, Pressable, Alert, useWindowDimensions, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useFinancialStore } from "../state/financialStore";
 import { useAuthStore } from "../state/authStore";
 import WebContainer from "../components/WebContainer";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width > 768;
   
@@ -217,7 +219,10 @@ export default function DashboardScreen() {
                 </Pressable>
                 
                 {isDropdownOpen && (
-                  <View className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 min-w-[240px]">
+                  <View 
+                    className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 min-w-[240px]"
+                    style={{ zIndex: 9999 }}
+                  >
                     <ScrollView style={{ maxHeight: 300 }}>
                       <Pressable
                         onPress={() => {
@@ -267,7 +272,10 @@ export default function DashboardScreen() {
                     <Text className="text-amber-700 text-sm">Assine para continuar criando e editando seus dados</Text>
                   </View>
                 </View>
-                <Pressable className="bg-amber-500 px-6 py-3 rounded-xl">
+                <Pressable 
+                  onPress={() => (navigation as any).navigate("Pricing")}
+                  className="bg-amber-500 px-6 py-3 rounded-xl"
+                >
                   <Text className="text-white font-bold">Ver Planos</Text>
                 </Pressable>
               </View>
@@ -288,7 +296,10 @@ export default function DashboardScreen() {
                     <Text className="text-blue-700 text-sm">Aproveite seu teste gratuito!</Text>
                   </View>
                 </View>
-                <Pressable className="bg-blue-500 px-6 py-3 rounded-xl">
+                <Pressable 
+                  onPress={() => (navigation as any).navigate("Pricing")}
+                  className="bg-blue-500 px-6 py-3 rounded-xl"
+                >
                   <Text className="text-white font-bold">Assinar Agora</Text>
                 </Pressable>
               </View>
