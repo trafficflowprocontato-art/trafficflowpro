@@ -17,6 +17,7 @@ import { useFinancialStore } from "../state/financialStore";
 import { useAuthStore } from "../state/authStore";
 import { AgencyExpense } from "../types/financial";
 import WebContainer from "../components/WebContainer";
+import MoneyDisplay from "../components/MoneyDisplay";
 
 export default function ExpensesScreen() {
   const insets = useSafeAreaInsets();
@@ -43,13 +44,6 @@ export default function ExpensesScreen() {
     const cleaned = text.replace(/[^0-9.,]/g, '');
     const normalized = cleaned.replace(',', '.');
     setValue(normalized);
-  };
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(val);
   };
 
   const handleAddExpense = () => {
@@ -160,9 +154,12 @@ export default function ExpensesScreen() {
                     Total de Despesas
                   </Text>
                 </View>
-                <Text className="text-white text-4xl font-bold">
-                  {formatCurrency(totalExpenses)}
-                </Text>
+                <MoneyDisplay 
+                  value={totalExpenses} 
+                  size="xl" 
+                  color="#ffffff"
+                  showToggle={true}
+                />
                 <Text className="text-red-100 text-sm mt-2">
                   {agencyExpenses.length}{" "}
                   {agencyExpenses.length === 1 ? "despesa" : "despesas"} cadastradas
@@ -287,9 +284,7 @@ export default function ExpensesScreen() {
                           <Text className="text-lg font-semibold text-gray-900">
                             {cat}
                           </Text>
-                          <Text className="text-red-600 font-bold">
-                            {formatCurrency(categoryTotal)}
-                          </Text>
+                          <MoneyDisplay value={categoryTotal} size="lg" color="#dc2626" />
                         </View>
 
                         <View className="gap-3">
@@ -302,9 +297,7 @@ export default function ExpensesScreen() {
                                 <Text className="text-gray-900 font-medium mb-1">
                                   {expense.description}
                                 </Text>
-                                <Text className="text-red-600 font-semibold text-base">
-                                  {formatCurrency(expense.value)}
-                                </Text>
+                                <MoneyDisplay value={expense.value} size="md" color="#dc2626" />
                               </View>
                               <Pressable
                                 onPress={() =>

@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useFinancialStore } from "../state/financialStore";
 import { useAuthStore } from "../state/authStore";
 import WebContainer from "../components/WebContainer";
+import MoneyDisplay from "../components/MoneyDisplay";
 
 export default function SellersScreen() {
   const insets = useSafeAreaInsets();
@@ -29,13 +30,6 @@ export default function SellersScreen() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
 
   const formatMonth = (month: string) => {
     const [year, monthNum] = month.split("-");
@@ -137,23 +131,30 @@ export default function SellersScreen() {
           <View className="flex-row gap-3 mb-6">
             <View className="flex-1 bg-blue-50 rounded-2xl p-4 border border-blue-100">
               <Text className="text-blue-700 text-xs font-medium mb-1">TOTAL</Text>
-              <Text className="text-blue-900 text-xl font-bold">
-                {formatCurrency(totalCommissions)}
-              </Text>
+              <MoneyDisplay 
+                value={totalCommissions} 
+                size="lg" 
+                color="#1e40af"
+                showToggle={true}
+              />
             </View>
             
             <View className="flex-1 bg-green-50 rounded-2xl p-4 border border-green-100">
               <Text className="text-green-700 text-xs font-medium mb-1">PAGOS</Text>
-              <Text className="text-green-900 text-xl font-bold">
-                {formatCurrency(totalPaid)}
-              </Text>
+              <MoneyDisplay 
+                value={totalPaid} 
+                size="lg" 
+                color="#166534"
+              />
             </View>
             
             <View className="flex-1 bg-yellow-50 rounded-2xl p-4 border border-yellow-100">
               <Text className="text-yellow-700 text-xs font-medium mb-1">PENDENTES</Text>
-              <Text className="text-yellow-900 text-xl font-bold">
-                {formatCurrency(totalPending)}
-              </Text>
+              <MoneyDisplay 
+                value={totalPending} 
+                size="lg" 
+                color="#a16207"
+              />
             </View>
           </View>
 
@@ -244,9 +245,10 @@ export default function SellersScreen() {
                     {/* Value */}
                     <View className="bg-gray-50 rounded-xl p-3 mb-3">
                       <Text className="text-gray-600 text-sm mb-1">Valor da Comissão</Text>
-                      <Text className="text-gray-900 text-2xl font-bold">
-                        {formatCurrency(commission.commissionValue)}
-                      </Text>
+                      <MoneyDisplay 
+                        value={commission.commissionValue} 
+                        size="xl" 
+                      />
                       {isPaid && commission.paidDate && (
                         <Text className="text-gray-500 text-xs mt-1">
                           Pago em: {new Date(commission.paidDate).toLocaleDateString("pt-BR")}

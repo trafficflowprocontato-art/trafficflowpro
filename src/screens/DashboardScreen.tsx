@@ -107,13 +107,6 @@ export default function DashboardScreen() {
     totalExpenses: filteredSummary.totalExpenses,
   });
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
-
   const handleLogout = () => {
     if (Platform.OS === "web") {
       // No web, usar confirm nativo do navegador
@@ -245,11 +238,14 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-gray-600 text-sm font-semibold">LUCRO LÍQUIDO</Text>
               </View>
-              <Text className="text-green-500 text-4xl font-bold mb-2">
-                {formatCurrency(filteredSummary.netProfit)}
-              </Text>
+              <MoneyDisplay 
+                value={filteredSummary.netProfit} 
+                size="xl" 
+                color="#10b981"
+                showToggle={true}
+              />
               <Text className="text-gray-500 text-sm">
-                Receita: {formatCurrency(filteredSummary.totalRevenue)}
+                Receita: <MoneyDisplay value={filteredSummary.totalRevenue} size="sm" />
               </Text>
             </View>
 
@@ -261,9 +257,11 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-gray-600 text-sm font-semibold">RECEITA TOTAL</Text>
               </View>
-              <Text className="text-blue-600 text-4xl font-bold mb-2">
-                {formatCurrency(filteredSummary.totalRevenue)}
-              </Text>
+              <MoneyDisplay 
+                value={filteredSummary.totalRevenue} 
+                size="xl" 
+                color="#3b82f6"
+              />
               <Text className="text-gray-500 text-sm">
                 {clients.length} {clients.length === 1 ? "cliente" : "clientes"}
               </Text>
@@ -277,9 +275,11 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-gray-600 text-sm font-semibold">DESPESAS TOTAIS</Text>
               </View>
-              <Text className="text-red-500 text-4xl font-bold mb-2">
-                {formatCurrency(filteredSummary.totalExpenses)}
-              </Text>
+              <MoneyDisplay 
+                value={filteredSummary.totalExpenses} 
+                size="xl" 
+                color="#ef4444"
+              />
               <Text className="text-gray-500 text-sm">
                 Comissões + Despesas
               </Text>
@@ -330,7 +330,7 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Receita Total</Text>
                   </View>
-                  <Text className="text-green-600 text-xl font-bold">{formatCurrency(filteredSummary.totalRevenue)}</Text>
+                  <MoneyDisplay value={filteredSummary.totalRevenue} size="lg" color="#059669" />
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
@@ -340,7 +340,10 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Comissões</Text>
                   </View>
-                  <Text className="text-orange-600 text-xl font-bold">-{formatCurrency(filteredSummary.totalCommissions)}</Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-orange-600 text-xl font-bold mr-1">-</Text>
+                    <MoneyDisplay value={filteredSummary.totalCommissions} size="lg" color="#f97316" />
+                  </View>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
@@ -350,7 +353,10 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Despesas Extras</Text>
                   </View>
-                  <Text className="text-purple-600 text-xl font-bold">-{formatCurrency(summary.totalExtraExpenses)}</Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-purple-600 text-xl font-bold mr-1">-</Text>
+                    <MoneyDisplay value={summary.totalExtraExpenses} size="lg" color="#a855f7" />
+                  </View>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
@@ -360,7 +366,10 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Despesas da Agência</Text>
                   </View>
-                  <Text className="text-blue-600 text-xl font-bold">-{formatCurrency(summary.totalAgencyExpenses)}</Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-blue-600 text-xl font-bold mr-1">-</Text>
+                    <MoneyDisplay value={summary.totalAgencyExpenses} size="lg" color="#3b82f6" />
+                  </View>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4">
@@ -370,14 +379,17 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Total de Despesas</Text>
                   </View>
-                  <Text className="text-red-600 text-xl font-bold">-{formatCurrency(filteredSummary.totalExpenses)}</Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-red-600 text-xl font-bold mr-1">-</Text>
+                    <MoneyDisplay value={filteredSummary.totalExpenses} size="lg" color="#ef4444" />
+                  </View>
                 </View>
               </View>
 
               <View className="bg-green-50 rounded-xl p-6 mt-6 border-2 border-green-200">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-gray-700 text-lg font-bold">Lucro Líquido</Text>
-                  <Text className="text-green-600 text-3xl font-bold">{formatCurrency(filteredSummary.netProfit)}</Text>
+                  <MoneyDisplay value={filteredSummary.netProfit} size="xl" color="#059669" />
                 </View>
               </View>
             </View>
@@ -491,10 +503,16 @@ export default function DashboardScreen() {
               Lucro Líquido
             </Text>
           </View>
-          <Text className="text-green-500 text-4xl font-bold">
-            {formatCurrency(filteredSummary.netProfit)}
-          </Text>
+          <MoneyDisplay 
+            value={filteredSummary.netProfit} 
+            size="xl" 
+            color="#10b981"
+            showToggle={true}
+          />
           <Text className="text-blue-600 text-sm mt-2">
+            Receita total: <MoneyDisplay value={filteredSummary.totalRevenue} size="sm" />
+          </Text>
+        </View>
 
         {/* Seletor de Mês Mobile */}
         <View className="mb-6">
@@ -523,9 +541,6 @@ export default function DashboardScreen() {
               ))}
             </View>
           </ScrollView>
-        </View>
-            Receita total: {formatCurrency(filteredSummary.totalRevenue)}
-          </Text>
         </View>
 
         {/* Status dos Clientes */}
@@ -575,13 +590,13 @@ export default function DashboardScreen() {
               Clientes: {clients.length} | Despesas Agência: {agencyExpenses.length}
             </Text>
             <Text className="text-gray-600 text-xs">
-              Total Despesas Agência: {formatCurrency(summary.totalAgencyExpenses)}
+              Total Despesas Agência: <MoneyDisplay value={summary.totalAgencyExpenses} size="sm" />
             </Text>
             <Text className="text-gray-600 text-xs">
               Comissões Totais: {sellerCommissions.length} | Pagas: {sellerCommissions.filter((c) => c.paymentStatus === "paid").length}
             </Text>
             <Text className="text-gray-600 text-xs">
-              Total Comissões Pagas: {formatCurrency(filteredSummary.totalCommissions)}
+              Total Comissões Pagas: <MoneyDisplay value={filteredSummary.totalCommissions} size="sm" />
             </Text>
           </View>
           
@@ -593,9 +608,7 @@ export default function DashboardScreen() {
               </View>
               <Text className="text-gray-700 font-medium">Receita Total</Text>
             </View>
-            <Text className="text-green-600 font-semibold text-base">
-              {formatCurrency(filteredSummary.totalRevenue)}
-            </Text>
+            <MoneyDisplay value={filteredSummary.totalRevenue} size="md" color="#059669" />
           </View>
 
           {/* Comissões */}
@@ -606,9 +619,10 @@ export default function DashboardScreen() {
               </View>
               <Text className="text-gray-700 font-medium">Comissões</Text>
             </View>
-            <Text className="text-orange-600 font-semibold text-base">
-              -{formatCurrency(filteredSummary.totalCommissions)}
-            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-orange-600 font-semibold text-base mr-1">-</Text>
+              <MoneyDisplay value={filteredSummary.totalCommissions} size="md" color="#f97316" />
+            </View>
           </View>
 
           {/* Despesas Extras */}
@@ -619,9 +633,10 @@ export default function DashboardScreen() {
               </View>
               <Text className="text-gray-700 font-medium">Despesas Extras</Text>
             </View>
-            <Text className="text-purple-600 font-semibold text-base">
-              -{formatCurrency(summary.totalExtraExpenses)}
-            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-purple-600 font-semibold text-base mr-1">-</Text>
+              <MoneyDisplay value={summary.totalExtraExpenses} size="md" color="#a855f7" />
+            </View>
           </View>
 
           {/* Despesas da Agência */}
@@ -632,9 +647,10 @@ export default function DashboardScreen() {
               </View>
               <Text className="text-gray-700 font-medium">Despesas da Agência</Text>
             </View>
-            <Text className="text-blue-600 font-semibold text-base">
-              -{formatCurrency(summary.totalAgencyExpenses)}
-            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-blue-600 font-semibold text-base mr-1">-</Text>
+              <MoneyDisplay value={summary.totalAgencyExpenses} size="md" color="#3b82f6" />
+            </View>
           </View>
 
           {/* Total de Despesas */}
@@ -645,20 +661,20 @@ export default function DashboardScreen() {
               </View>
               <Text className="text-gray-700 font-medium">Total de Despesas</Text>
             </View>
-            <Text className="text-red-600 font-semibold text-base">
-              -{formatCurrency(filteredSummary.totalExpenses)}
-            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-red-600 font-semibold text-base mr-1">-</Text>
+              <MoneyDisplay value={filteredSummary.totalExpenses} size="md" color="#ef4444" />
+            </View>
           </View>
 
           {/* Lucro Líquido */}
           <View className="flex-row justify-between items-center pt-4">
             <Text className="text-gray-900 font-bold text-base">Lucro Líquido</Text>
-            <Text 
-              className="font-bold text-lg"
-              style={{ color: filteredSummary.netProfit >= 0 ? "#22c55e" : "#ef4444" }}
-            >
-              {formatCurrency(filteredSummary.netProfit)}
-            </Text>
+            <MoneyDisplay 
+              value={filteredSummary.netProfit} 
+              size="lg" 
+              color={filteredSummary.netProfit >= 0 ? "#22c55e" : "#ef4444"}
+            />
           </View>
         </View>
       </View>

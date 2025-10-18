@@ -7,6 +7,7 @@ import { useFinancialStore } from "../state/financialStore";
 import { useAuthStore } from "../state/authStore";
 import { Client } from "../types/financial";
 import WebContainer from "../components/WebContainer";
+import MoneyDisplay from "../components/MoneyDisplay";
 
 export default function ClientsScreen() {
   const insets = useSafeAreaInsets();
@@ -22,13 +23,6 @@ export default function ClientsScreen() {
   }, [calculateTrialInfo]);
   
   const isReadOnly = trialInfo && !trialInfo.hasFullAccess;
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -205,26 +199,20 @@ export default function ClientsScreen() {
                       )}
                       <View className="flex-row justify-between mb-2">
                         <Text className="text-gray-600 text-sm">Valor Mensal</Text>
-                        <Text className="text-gray-900 font-semibold">
-                          {formatCurrency(client.monthlyValue)}
-                        </Text>
+                        <MoneyDisplay value={client.monthlyValue} size="md" />
                       </View>
                       <View className="flex-row justify-between mb-2">
                         <Text className="text-gray-600 text-sm">
                           Comissão ({client.sellerCommission}%)
                         </Text>
-                        <Text className="text-orange-600 font-medium">
-                          {formatCurrency(commission)}
-                        </Text>
+                        <MoneyDisplay value={commission} size="md" color="#f97316" />
                       </View>
                       {totalExtraExpenses > 0 && (
                         <View className="flex-row justify-between">
                           <Text className="text-gray-600 text-sm">
                             Despesas Extras
                           </Text>
-                          <Text className="text-purple-600 font-medium">
-                            {formatCurrency(totalExtraExpenses)}
-                          </Text>
+                          <MoneyDisplay value={totalExtraExpenses} size="md" color="#a855f7" />
                         </View>
                       )}
                     </View>
@@ -243,9 +231,7 @@ export default function ClientsScreen() {
                             <Text className="text-gray-600 text-sm flex-1">
                               • {expense.description}
                             </Text>
-                            <Text className="text-gray-900 text-sm font-medium">
-                              {formatCurrency(expense.value)}
-                            </Text>
+                            <MoneyDisplay value={expense.value} size="sm" />
                           </View>
                         ))}
                       </View>
