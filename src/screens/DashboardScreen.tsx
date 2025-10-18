@@ -90,6 +90,27 @@ export default function DashboardScreen() {
   const pendingClients = clients.filter((c) => c.paymentStatus === "pending").length;
   const overdueClients = clients.filter((c) => c.paymentStatus === "overdue").length;
 
+  // Previsão de faturamento do mês atual
+  const getCurrentMonthForecast = () => {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Total esperado (todos os clientes ativos)
+    const totalExpected = clients.reduce((sum, c) => sum + c.monthlyValue, 0);
+    
+    // Total já pago este mês
+    const paidThisMonth = clients
+      .filter(c => c.lastPaymentMonth === currentMonth)
+      .reduce((sum, c) => sum + c.monthlyValue, 0);
+    
+    // Ainda a receber
+    const toReceive = totalExpected - paidThisMonth;
+    
+    return { totalExpected, paidThisMonth, toReceive };
+  };
+  
+  const forecast = getCurrentMonthForecast();
+
   // Debug: Log para verificar valores
   console.log("Dashboard Debug:", {
     clients: clients.length,
@@ -189,6 +210,99 @@ export default function DashboardScreen() {
         </View>
 
         <View className="max-w-7xl mx-auto w-full px-8 py-8">
+          {/* Gráficos e Previsão */}
+          <View className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+            <Text className="text-2xl font-bold text-gray-900 mb-6">📊 Visão Financeira</Text>
+            
+            {/* Grid de Barras */}
+            <View className="gap-5">
+              {/* Faturamento */}
+              <View>
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-gray-700 font-semibold">💰 Faturamento</Text>
+                  <Text className="text-green-600 font-bold">{formatCurrency(filteredSummary.totalRevenue)}</Text>
+                </View>
+                <View className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                  <View 
+                    className="h-full bg-green-500 rounded-full"
+                    style={{ width: `${Math.min((filteredSummary.totalRevenue / Math.max(filteredSummary.totalRevenue, filteredSummary.totalExpenses, 1)) * 100, 100)}%` }}
+                  />
+                </View>
+              </View>
+
+              {/* Despesas */}
+              <View>
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-gray-700 font-semibold">💸 Despesas Totais</Text>
+                  <Text className="text-red-600 font-bold">{formatCurrency(filteredSummary.totalExpenses)}</Text>
+                </View>
+                <View className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                  <View 
+                    className="h-full bg-red-500 rounded-full"
+                    style={{ width: `${Math.min((filteredSummary.totalExpenses / Math.max(filteredSummary.totalRevenue, filteredSummary.totalExpenses, 1)) * 100, 100)}%` }}
+                  />
+                </View>
+              </View>
+
+              {/* Lucro */}
+              <View>
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-gray-700 font-semibold">📈 Lucro Líquido</Text>
+                  <Text className={`font-bold ${filteredSummary.netProfit >= 0 ? "text-blue-600" : "text-red-600"}`}>
+                    {formatCurrency(filteredSummary.netProfit)}
+                  </Text>
+                </View>
+                <View className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                  <View 
+                    className={`h-full rounded-full ${filteredSummary.netProfit >= 0 ? "bg-blue-500" : "bg-red-500"}`}
+                    style={{ width: `${Math.min(Math.abs(filteredSummary.netProfit) / Math.max(filteredSummary.totalRevenue, 1) * 100, 100)}%` }}
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* Previsão do Mês Atual */}
+            <View className="mt-8 pt-6 border-t border-gray-200">
+              <Text className="text-xl font-bold text-gray-900 mb-4">🔮 Previsão do Mês Atual</Text>
+              
+              <View className="gap-4">
+                <View className="flex-row justify-between items-center">
+                  <View>
+                    <Text className="text-gray-600 text-sm">Faturamento Esperado</Text>
+                    <Text className="text-2xl font-bold text-gray-900">{formatCurrency(forecast.totalExpected)}</Text>
+                  </View>
+                  <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center">
+                    <Ionicons name="calendar-outline" size={28} color="#3b82f6" />
+                  </View>
+                </View>
+
+                <View className="flex-row justify-between items-center bg-green-50 p-4 rounded-xl">
+                  <View>
+                    <Text className="text-green-700 text-sm">Já Recebido</Text>
+                    <Text className="text-xl font-bold text-green-600">{formatCurrency(forecast.paidThisMonth)}</Text>
+                  </View>
+                  <View className="px-3 py-1 bg-green-200 rounded-full">
+                    <Text className="text-green-800 font-bold text-xs">
+                      {forecast.totalExpected > 0 ? Math.round((forecast.paidThisMonth / forecast.totalExpected) * 100) : 0}%
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row justify-between items-center bg-amber-50 p-4 rounded-xl">
+                  <View>
+                    <Text className="text-amber-700 text-sm">Ainda a Receber</Text>
+                    <Text className="text-xl font-bold text-amber-600">{formatCurrency(forecast.toReceive)}</Text>
+                  </View>
+                  <View className="px-3 py-1 bg-amber-200 rounded-full">
+                    <Text className="text-amber-800 font-bold text-xs">
+                      {forecast.totalExpected > 0 ? Math.round((forecast.toReceive / forecast.totalExpected) * 100) : 0}%
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+
           {/* Trial Banner Desktop */}
           {trialInfo && !trialInfo.hasFullAccess && (
             <View className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 mb-8 shadow-sm">
