@@ -134,55 +134,150 @@ export default function DashboardScreen() {
     }
   };
 
-  // Desktop Layout Component
+  // Desktop Layout Component com Sidebar
   const DesktopDashboard = () => (
-    <View className={`flex-1 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
-      <ScrollView 
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header Desktop */}
-        <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-b px-8 py-6`}>
-          <View className="max-w-7xl mx-auto w-full flex-row justify-between items-center">
-            <View>
-              <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Dashboard</Text>
-              <Text className={`${isDark ? "text-gray-400" : "text-gray-500"} mt-1`}>Bem-vindo, {user?.name || "Usuário"}! 👋</Text>
+    <View className="flex-1 flex-row">
+      {/* Sidebar */}
+      <View className={`${isDark ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} border-r`} style={{ width: 280 }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Logo/Brand */}
+          <View className={`px-6 py-6 border-b ${isDark ? "border-gray-800" : "border-gray-200"}`}>
+            <View className="flex-row items-center mb-6">
+              <View className="w-12 h-12 bg-blue-500 rounded-2xl items-center justify-center mr-3">
+                <Ionicons name="bar-chart" size={24} color="white" />
+              </View>
+              <View>
+                <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                  TrafficFlow Pro
+                </Text>
+                <Text className={`text-xs ${isDark ? "text-gray-500" : "text-gray-500"}`}>
+                  Gestão Financeira
+                </Text>
+              </View>
             </View>
-            <View className="flex-row items-center gap-3">
-              {/* Toggle de Visibilidade de Valores */}
-              <Pressable
-                onPress={toggleHideValues}
-                className={`flex-row items-center gap-2 px-4 py-2 ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"} rounded-xl border`}
-              >
-                <Ionicons name={hideValues ? "eye-off" : "eye"} size={20} color={isDark ? "#9ca3af" : "#6b7280"} />
-                <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold`}>
-                  {hideValues ? "Mostrar" : "Ocultar"}
-                </Text>
-              </Pressable>
-              
-              {/* Toggle de Tema */}
-              <Pressable
-                onPress={toggleTheme}
-                className={`flex-row items-center gap-2 px-4 py-2 ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"} rounded-xl border`}
-              >
-                <Ionicons name={isDark ? "sunny" : "moon"} size={20} color={isDark ? "#fbbf24" : "#6b7280"} />
-                <Text className={`${isDark ? "text-gray-300" : "text-gray-700"} font-semibold`}>
-                  {isDark ? "Claro" : "Escuro"}
-                </Text>
-              </Pressable>
-              
-              {/* Botão Sair */}
-              <Pressable
-                onPress={handleLogout}
-                className="flex-row items-center gap-2 px-4 py-2 bg-red-50 rounded-xl border border-red-200"
-              >
-                <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-                <Text className="text-red-600 font-semibold">Sair</Text>
-              </Pressable>
+            
+            {/* User Profile */}
+            <View className={`p-3 rounded-xl ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full items-center justify-center mr-3">
+                  <Text className="text-white font-bold">
+                    {user?.name?.charAt(0).toUpperCase() || "U"}
+                  </Text>
+                </View>
+                <View className="flex-1">
+                  <Text className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                    {user?.name || "Usuário"}
+                  </Text>
+                  <Text className={`text-xs ${isDark ? "text-gray-500" : "text-gray-500"}`} numberOfLines={1}>
+                    {user?.email}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
+
+          {/* Navigation Menu */}
+          <View className="py-4 px-3">
+            <Text className={`px-3 mb-3 text-xs font-bold uppercase ${isDark ? "text-gray-500" : "text-gray-500"}`}>
+              Menu Principal
+            </Text>
+            
+            <Pressable className={`mb-2 rounded-xl ${isDark ? "bg-blue-600/20" : "bg-blue-50"} p-3`}>
+              <View className="flex-row items-center">
+                <View className="w-9 h-9 bg-blue-500 rounded-lg items-center justify-center mr-3">
+                  <Ionicons name="stats-chart" size={20} color="white" />
+                </View>
+                <Text className={`font-semibold ${isDark ? "text-blue-400" : "text-blue-600"}`}>
+                  Dashboard
+                </Text>
+              </View>
+            </Pressable>
+            
+            {/* Outros itens do menu (não ativos) */}
+            {[
+              { icon: "people", label: "Clientes" },
+              { icon: "cash", label: "Vendedores" },
+              { icon: "wallet", label: "Despesas" },
+              { icon: "card", label: "Cobranças" },
+              { icon: "diamond", label: "Planos" },
+            ].map((item) => (
+              <Pressable key={item.label} className={`mb-2 rounded-xl p-3`}>
+                <View className="flex-row items-center">
+                  <View className={`w-9 h-9 ${isDark ? "bg-gray-800" : "bg-gray-100"} rounded-lg items-center justify-center mr-3`}>
+                    <Ionicons name={item.icon as any} size={20} color={isDark ? "#6b7280" : "#9ca3af"} />
+                  </View>
+                  <Text className={`font-medium ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                    {item.label}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Settings Section */}
+          <View className={`py-4 px-3 border-t ${isDark ? "border-gray-800" : "border-gray-200"}`}>
+            <Text className={`px-3 mb-3 text-xs font-bold uppercase ${isDark ? "text-gray-500" : "text-gray-500"}`}>
+              Configurações
+            </Text>
+            
+            <Pressable onPress={toggleTheme} className={`mb-2 rounded-xl p-3 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <View className="w-9 h-9 bg-purple-500 rounded-lg items-center justify-center mr-3">
+                    <Ionicons name={isDark ? "moon" : "sunny"} size={20} color="white" />
+                  </View>
+                  <Text className={`font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+                    Tema {isDark ? "Escuro" : "Claro"}
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+
+            <Pressable onPress={toggleHideValues} className={`mb-2 rounded-xl p-3 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <View className="w-9 h-9 bg-indigo-500 rounded-lg items-center justify-center mr-3">
+                    <Ionicons name={hideValues ? "eye-off" : "eye"} size={20} color="white" />
+                  </View>
+                  <Text className={`font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+                    {hideValues ? "Mostrar" : "Ocultar"}
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+
+            <Pressable onPress={handleLogout} className={`rounded-xl p-3 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
+              <View className="flex-row items-center">
+                <View className="w-9 h-9 bg-red-500 rounded-lg items-center justify-center mr-3">
+                  <Ionicons name="log-out" size={20} color="white" />
+                </View>
+                <Text className="font-medium text-red-500">
+                  Sair
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* Main Content */}
+      <View className="flex-1">
+        <ScrollView 
+          className={`flex-1 ${isDark ? "bg-gray-950" : "bg-gray-50"}`}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View className={`${isDark ? "bg-gray-900" : "bg-white"} px-8 py-6`}>
+            <View className="flex-row justify-between items-center">
+              <View>
+                <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                  Seja bem-vindo(a), {user?.name?.split(' ')[0] || "Pedro"}!
+                </Text>
+                <Text className={`text-sm mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}>
+                  Aqui está o resumo do seu negócio hoje
+                </Text>
+              </View>
 
         {/* Seletor de Mês */}
         <View className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} border-b px-8 py-4`}>
