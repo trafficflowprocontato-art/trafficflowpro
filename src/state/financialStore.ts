@@ -265,7 +265,13 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
   
   updateClient: async (id, updatedClient) => {
     const { userId } = get();
-    if (!userId) return;
+    console.log('🔍 updateClient - id:', id);
+    console.log('🔍 updateClient - updatedClient:', updatedClient);
+    
+    if (!userId) {
+      console.error('❌ userId não definido em updateClient');
+      return;
+    }
     
     try {
       // Atualizar no Supabase
@@ -277,14 +283,28 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
       if (updatedClient.sellerName) updateData.seller_name = updatedClient.sellerName;
       if (updatedClient.sellerCommission !== undefined) updateData.seller_commission = updatedClient.sellerCommission;
       if (updatedClient.extraExpenses) updateData.extra_expenses = updatedClient.extraExpenses;
+      if (updatedClient.lastPaymentMonth !== undefined) updateData.last_payment_month = updatedClient.lastPaymentMonth;
+      if (updatedClient.contractStartDate !== undefined) updateData.contract_start_date = updatedClient.contractStartDate;
+      if (updatedClient.firstPaymentMonth !== undefined) updateData.first_payment_month = updatedClient.firstPaymentMonth;
       
-      const { error } = await supabase
+      console.log('📤 Atualizando cliente no Supabase:', updateData);
+      
+      const { data, error } = await supabase
         .from('clients')
         .update(updateData)
         .eq('id', id)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select();
       
-      if (error) throw error;
+      console.log('📥 Resposta Supabase (update) - data:', data);
+      console.log('📥 Resposta Supabase (update) - error:', error);
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar cliente:', error);
+        throw error;
+      }
+      
+      console.log('✅ Cliente atualizado no Supabase com sucesso!');
       
       // Atualizar estado local
       set((state) => ({

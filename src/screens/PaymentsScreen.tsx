@@ -81,23 +81,34 @@ export default function PaymentsScreen({ navigation }: any) {
     };
   }, [clients]);
 
-  const handleMarkAsPaid = (client: Client & { realStatus: "paid" | "pending" | "overdue" }) => {
+  const handleMarkAsPaid = async (client: Client & { realStatus: "paid" | "pending" | "overdue" }) => {
     const today = new Date();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     
     Alert.alert(
       "Confirmar Pagamento",
-      `Marcar ${client.name} como PAGO neste mês?`,
+      `Marcar ${client.name} como PAGO neste mês (${currentMonth})?`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Confirmar",
-          onPress: () => {
-            updateClient(client.id, {
-              ...client,
-              lastPaymentMonth: currentMonth,
-              paymentStatus: "paid"
-            });
+          onPress: async () => {
+            try {
+              console.log('💰 Marcando cliente como pago:', client.name);
+              console.log('💰 Mês:', currentMonth);
+              
+              await updateClient(client.id, {
+                lastPaymentMonth: currentMonth,
+                paymentStatus: "paid"
+              });
+              
+              console.log('✅ Cliente marcado como pago com sucesso!');
+              
+              Alert.alert("Sucesso", `${client.name} foi marcado como pago!`);
+            } catch (error) {
+              console.error('❌ Erro ao marcar como pago:', error);
+              Alert.alert("Erro", "Não foi possível marcar como pago. Tente novamente.");
+            }
           }
         }
       ]
