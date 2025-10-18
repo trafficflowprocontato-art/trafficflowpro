@@ -120,6 +120,8 @@ function AuthStack() {
 }
 
 function AppStack() {
+  const isWeb = Platform.OS === 'web';
+  
   return (
     <Stack.Navigator
       screenOptions={{
@@ -131,7 +133,7 @@ function AppStack() {
         name="AddClient"
         component={AddClientScreen}
         options={{
-          presentation: "modal",
+          presentation: isWeb ? "card" : "modal",
         }}
       />
       <Stack.Screen name="Payments" component={PaymentsScreen} />
