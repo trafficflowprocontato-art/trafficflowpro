@@ -46,7 +46,7 @@ export default function ExpensesScreen() {
     setValue(normalized);
   };
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (isReadOnly) {
       if (Platform.OS === "web") {
         window.alert("Seu período de teste expirou. Assine para continuar adicionando despesas.");
@@ -59,7 +59,12 @@ export default function ExpensesScreen() {
       return;
     }
     
-    if (!description.trim() || !value || !category.trim()) {
+    if (!description.trim() || !value) {
+      if (Platform.OS === "web") {
+        window.alert("Por favor, preencha a descrição e o valor.");
+      } else {
+        Alert.alert("Campos obrigatórios", "Por favor, preencha a descrição e o valor.");
+      }
       return;
     }
 
@@ -67,14 +72,29 @@ export default function ExpensesScreen() {
       id: Date.now().toString(),
       description: description.trim(),
       value: parseFloat(value),
-      category: category.trim(),
+      category: category.trim() || "Geral",
     };
 
-    addAgencyExpense(expense);
-    setDescription("");
-    setValue("");
-    setCategory("");
-    setShowAddForm(false);
+    try {
+      await addAgencyExpense(expense);
+      setDescription("");
+      setValue("");
+      setCategory("");
+      setShowAddForm(false);
+      
+      if (Platform.OS === "web") {
+        // Sucesso silencioso no web
+      } else {
+        Alert.alert("Sucesso", "Despesa adicionada com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar despesa:", error);
+      if (Platform.OS === "web") {
+        window.alert("Erro ao adicionar despesa. Tente novamente.");
+      } else {
+        Alert.alert("Erro", "Não foi possível adicionar a despesa. Tente novamente.");
+      }
+    }
   };
 
   const handleDeleteExpense = (id: string, desc: string) => {
