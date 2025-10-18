@@ -2,6 +2,25 @@ import { create } from "zustand";
 import { Client, AgencyExpense, FinancialSummary, SellerCommissionRecord } from "../types/financial";
 import { supabase } from "../services/supabase";
 
+// Helper function to check authentication
+async function checkAuth() {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    console.log('🔐 Auth Check - Session:', session ? '✅ Authenticated' : '❌ Not authenticated');
+    console.log('🔐 Auth Check - User ID:', session?.user?.id || 'None');
+    console.log('🔐 Auth Check - Email:', session?.user?.email || 'None');
+    
+    if (error) {
+      console.error('❌ Auth Check - Error:', error);
+    }
+    
+    return session?.user?.id || null;
+  } catch (err) {
+    console.error('❌ Auth Check - Exception:', err);
+    return null;
+  }
+}
+
 interface FinancialState {
   clients: Client[];
   agencyExpenses: AgencyExpense[];
@@ -128,12 +147,26 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
   
   addClient: async (client) => {
     const { userId } = get();
-    console.log('🔍 addClient - userId:', userId);
-    console.log('🔍 addClient - client:', client);
+    console.log('🔍 addClient - userId from store:', userId);
+    console.log('🔍 addClient - client data:', client);
+    
+    // Check actual authentication status
+    const authUserId = await checkAuth();
+    console.log('🔍 addClient - userId from auth:', authUserId);
     
     if (!userId) {
       console.error('❌ userId não está definido em addClient!');
-      return;
+      throw new Error('Usuário não autenticado. Faça login novamente.');
+    }
+    
+    if (!authUserId) {
+      console.error('❌ Sessão expirada ou inválida!');
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
+    
+    if (userId !== authUserId) {
+      console.error('⚠️ userId no store diferente do userId autenticado!');
+      console.error('⚠️ Store:', userId, 'Auth:', authUserId);
     }
     
     try {
@@ -384,12 +417,26 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
   
   addAgencyExpense: async (expense) => {
     const { userId } = get();
-    console.log('🔍 addAgencyExpense - userId:', userId);
-    console.log('🔍 addAgencyExpense - expense:', expense);
+    console.log('🔍 addAgencyExpense - userId from store:', userId);
+    console.log('🔍 addAgencyExpense - expense data:', expense);
+    
+    // Check actual authentication status
+    const authUserId = await checkAuth();
+    console.log('🔍 addAgencyExpense - userId from auth:', authUserId);
     
     if (!userId) {
       console.error('❌ userId não está definido!');
-      return;
+      throw new Error('Usuário não autenticado. Faça login novamente.');
+    }
+    
+    if (!authUserId) {
+      console.error('❌ Sessão expirada ou inválida!');
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
+    
+    if (userId !== authUserId) {
+      console.error('⚠️ userId no store diferente do userId autenticado!');
+      console.error('⚠️ Store:', userId, 'Auth:', authUserId);
     }
     
     try {
