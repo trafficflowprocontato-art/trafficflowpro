@@ -164,11 +164,15 @@ function AuthStack() {
 
 function AppStack() {
   const isWeb = Platform.OS === 'web';
+  const { width } = useWindowDimensions();
+  const isDesktop = isWeb && width >= 1024;
   
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        // No web desktop, usar apresentação modal consistente
+        presentation: (isDesktop ? "card" : "modal"),
       }}
     >
       <Stack.Screen name="Main" component={MainNavigator} />
@@ -176,10 +180,11 @@ function AppStack() {
         name="AddClient"
         component={AddClientScreen}
         options={{
-          presentation: isWeb ? "card" : "modal",
+          // Forçar card no web para evitar página branca
+          presentation: "card",
+          animation: isWeb ? "fade" : "default",
         }}
       />
-      <Stack.Screen name="Payments" component={PaymentsScreen} />
     </Stack.Navigator>
   );
 }
