@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFinancialStore } from "../state/financialStore";
@@ -85,34 +85,58 @@ export default function PaymentsScreen({ navigation }: any) {
     const today = new Date();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     
-    Alert.alert(
-      "Confirmar Pagamento",
-      `Marcar ${client.name} como PAGO neste mês (${currentMonth})?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Confirmar",
-          onPress: async () => {
-            try {
-              console.log('💰 Marcando cliente como pago:', client.name);
-              console.log('💰 Mês:', currentMonth);
-              
-              await updateClient(client.id, {
-                lastPaymentMonth: currentMonth,
-                paymentStatus: "paid"
-              });
-              
-              console.log('✅ Cliente marcado como pago com sucesso!');
-              
-              Alert.alert("Sucesso", `${client.name} foi marcado como pago!`);
-            } catch (error) {
-              console.error('❌ Erro ao marcar como pago:', error);
-              Alert.alert("Erro", "Não foi possível marcar como pago. Tente novamente.");
+    if (Platform.OS === "web") {
+      // Web: usar window.confirm
+      const confirmed = window.confirm(`Marcar ${client.name} como PAGO neste mês (${currentMonth})?`);
+      if (confirmed) {
+        try {
+          console.log('💰 Marcando cliente como pago:', client.name);
+          console.log('💰 Mês:', currentMonth);
+          
+          await updateClient(client.id, {
+            lastPaymentMonth: currentMonth,
+            paymentStatus: "paid"
+          });
+          
+          console.log('✅ Cliente marcado como pago com sucesso!');
+          
+          window.alert(`${client.name} foi marcado como pago!`);
+        } catch (error) {
+          console.error('❌ Erro ao marcar como pago:', error);
+          window.alert("Não foi possível marcar como pago. Tente novamente.");
+        }
+      }
+    } else {
+      // Mobile: usar Alert.alert
+      Alert.alert(
+        "Confirmar Pagamento",
+        `Marcar ${client.name} como PAGO neste mês (${currentMonth})?`,
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Confirmar",
+            onPress: async () => {
+              try {
+                console.log('💰 Marcando cliente como pago:', client.name);
+                console.log('💰 Mês:', currentMonth);
+                
+                await updateClient(client.id, {
+                  lastPaymentMonth: currentMonth,
+                  paymentStatus: "paid"
+                });
+                
+                console.log('✅ Cliente marcado como pago com sucesso!');
+                
+                Alert.alert("Sucesso", `${client.name} foi marcado como pago!`);
+              } catch (error) {
+                console.error('❌ Erro ao marcar como pago:', error);
+                Alert.alert("Erro", "Não foi possível marcar como pago. Tente novamente.");
+              }
             }
           }
-        }
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const StatusBadge = ({ status }: { status: string }) => {

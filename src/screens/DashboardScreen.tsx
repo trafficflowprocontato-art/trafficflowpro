@@ -20,6 +20,7 @@ export default function DashboardScreen() {
   const trialInfo = useAuthStore((s) => s.trialInfo);
   const calculateTrialInfo = useAuthStore((s) => s.calculateTrialInfo);
   const [selectedMonth, setSelectedMonth] = React.useState<string>("total"); // "total" ou "2025-10"
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   
   // Calcular trial info ao montar componente
   React.useEffect(() => {
@@ -109,6 +110,43 @@ export default function DashboardScreen() {
     }).format(value);
   };
 
+  // Frases motivacionais por período do dia
+  const getMotivationalPhrase = () => {
+    const hour = new Date().getHours();
+    
+    if (hour >= 5 && hour < 12) {
+      // Manhã (5h - 11h59)
+      const morningPhrases = [
+        "Bom dia! Comece o dia com energia! ☀️",
+        "Bom dia! Hoje é dia de conquistar metas! 🚀",
+        "Bom dia! O sucesso começa agora! 💪",
+        "Bom dia! Foque no resultado! 🎯",
+        "Bom dia! Cada dia é uma nova oportunidade! ✨",
+      ];
+      return morningPhrases[Math.floor(Math.random() * morningPhrases.length)];
+    } else if (hour >= 12 && hour < 18) {
+      // Tarde (12h - 17h59)
+      const afternoonPhrases = [
+        "Boa tarde! Continue firme! 💼",
+        "Boa tarde! A vitória está próxima! 🏆",
+        "Boa tarde! Mantenha o foco! 🎯",
+        "Boa tarde! Você está no caminho certo! ⭐",
+        "Boa tarde! Siga em frente com determinação! 🚀",
+      ];
+      return afternoonPhrases[Math.floor(Math.random() * afternoonPhrases.length)];
+    } else {
+      // Noite (18h - 4h59)
+      const nightPhrases = [
+        "Boa noite! Organize o amanhã! 🌙",
+        "Boa noite! Planeje suas estratégias! 📊",
+        "Boa noite! Reflita sobre suas conquistas! ⭐",
+        "Boa noite! Descanse para amanhã brilhar! 💫",
+        "Boa noite! Amanhã será ainda melhor! 🌟",
+      ];
+      return nightPhrases[Math.floor(Math.random() * nightPhrases.length)];
+    }
+  };
+
   const handleLogout = () => {
     if (Platform.OS === "web") {
       // No web, usar confirm nativo do navegador
@@ -146,7 +184,7 @@ export default function DashboardScreen() {
           <View className="max-w-7xl mx-auto w-full flex-row justify-between items-center">
             <View>
               <Text className="text-3xl font-bold text-gray-900">Dashboard</Text>
-              <Text className="text-gray-500 mt-1">Bem-vindo, {user?.name || "Usuário"}! 👋</Text>
+              <Text className="text-gray-500 mt-1">{getMotivationalPhrase()}</Text>
             </View>
             <Pressable
               onPress={handleLogout}
@@ -158,33 +196,60 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Seletor de Mês */}
+        {/* Seletor de Mês - Dropdown Desktop */}
         <View className="bg-white border-b border-gray-100 px-8 py-4">
           <View className="max-w-7xl mx-auto w-full">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
+            <View className="flex-row items-center gap-3">
+              <Text className="text-gray-700 font-semibold">Filtrar por período:</Text>
+              <View className="relative">
                 <Pressable
-                  onPress={() => setSelectedMonth("total")}
-                  className={`px-4 py-2 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : "bg-gray-100"}`}
+                  onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex-row items-center gap-2 px-4 py-2 bg-blue-600 rounded-xl border border-blue-700"
                 >
-                  <Text className={`font-semibold ${selectedMonth === "total" ? "text-white" : "text-gray-700"}`}>
-                    📊 Total (Tudo)
+                  <Text className="text-white font-semibold">
+                    {selectedMonth === "total" ? "📊 Total (Tudo)" : availableMonths.find(m => m.key === selectedMonth)?.label || "Selecione"}
                   </Text>
+                  <Ionicons 
+                    name={isDropdownOpen ? "chevron-up" : "chevron-down"} 
+                    size={20} 
+                    color="white" 
+                  />
                 </Pressable>
                 
-                {availableMonths.map(month => (
-                  <Pressable
-                    key={month.key}
-                    onPress={() => setSelectedMonth(month.key)}
-                    className={`px-4 py-2 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : "bg-gray-100"}`}
-                  >
-                    <Text className={`font-semibold ${selectedMonth === month.key ? "text-white" : "text-gray-700"}`}>
-                      {month.label}
-                    </Text>
-                  </Pressable>
-                ))}
+                {isDropdownOpen && (
+                  <View className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 min-w-[240px]">
+                    <ScrollView style={{ maxHeight: 300 }}>
+                      <Pressable
+                        onPress={() => {
+                          setSelectedMonth("total");
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`px-4 py-3 border-b border-gray-100 ${selectedMonth === "total" ? "bg-blue-50" : "bg-white"}`}
+                      >
+                        <Text className={`font-semibold ${selectedMonth === "total" ? "text-blue-600" : "text-gray-700"}`}>
+                          📊 Total (Tudo)
+                        </Text>
+                      </Pressable>
+                      
+                      {availableMonths.map(month => (
+                        <Pressable
+                          key={month.key}
+                          onPress={() => {
+                            setSelectedMonth(month.key);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`px-4 py-3 border-b border-gray-100 ${selectedMonth === month.key ? "bg-blue-50" : "bg-white"}`}
+                        >
+                          <Text className={`font-medium ${selectedMonth === month.key ? "text-blue-600" : "text-gray-700"}`}>
+                            {month.label}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
               </View>
-            </ScrollView>
+            </View>
           </View>
         </View>
 
@@ -466,7 +531,7 @@ export default function DashboardScreen() {
                 TrafficFlow Pro
               </Text>
               <Text className="text-base text-gray-500">
-                Olá, {user?.name || "Usuário"}!
+                {getMotivationalPhrase()}
               </Text>
             </View>
             <Pressable

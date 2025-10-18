@@ -552,7 +552,10 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
     const { clients, sellerCommissions, userId } = get();
     if (!userId) return;
     
-    const paidClients = clients.filter((c) => c.paymentStatus === "paid");
+    // Filtrar apenas clientes pagos E que têm vendedor
+    const paidClients = clients.filter(
+      (c) => c.paymentStatus === "paid" && c.sellerName && c.sellerName.trim() !== ""
+    );
     
     const validClientIds = paidClients.map((c) => c.id);
     const existingCommissions = sellerCommissions.filter(
@@ -598,20 +601,20 @@ export const useFinancialStore = create<FinancialState>()((set, get) => ({
       }));
     }
     
-    // Atualizar comissões existentes
+    // Atualizar comissões existentes (apenas se ainda tiver vendedor)
     for (const client of paidClients) {
       const commission = sellerCommissions.find(
         (c) => c.month === month && c.clientId === client.id
       );
       
-      if (commission) {
+      if (commission && client.sellerName && client.sellerName.trim() !== "") {
         const newCommissionValue = (client.monthlyValue * client.sellerCommission) / 100;
         
         await supabase
           .from('seller_commissions')
           .update({
             client_name: client.name,
-            seller_name: client.sellerName || "Sem vendedor",
+            seller_name: client.sellerName,
             commission_value: newCommissionValue,
           })
           .eq('id', commission.id)
