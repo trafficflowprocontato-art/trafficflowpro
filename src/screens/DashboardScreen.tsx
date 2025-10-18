@@ -4,9 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFinancialStore } from "../state/financialStore";
 import { useAuthStore } from "../state/authStore";
-import { useAppStore } from "../state/appStore";
 import WebContainer from "../components/WebContainer";
-import MoneyDisplay from "../components/MoneyDisplay";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -21,10 +19,7 @@ export default function DashboardScreen() {
   const logout = useAuthStore((s) => s.logout);
   const trialInfo = useAuthStore((s) => s.trialInfo);
   const calculateTrialInfo = useAuthStore((s) => s.calculateTrialInfo);
-  const theme = useAppStore((s) => s.theme);
   const [selectedMonth, setSelectedMonth] = React.useState<string>("total"); // "total" ou "2025-10"
-  
-  const isDark = theme === "dark";
   
   // Calcular trial info ao montar componente
   React.useEffect(() => {
@@ -245,14 +240,11 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-gray-600 text-sm font-semibold">LUCRO LÍQUIDO</Text>
               </View>
-              <MoneyDisplay 
-                value={filteredSummary.netProfit} 
-                size="xl" 
-                color="#10b981"
-                showToggle={true}
-              />
+              <Text className="text-green-500 text-4xl font-bold mb-2">
+                {formatCurrency(filteredSummary.netProfit)}
+              </Text>
               <Text className="text-gray-500 text-sm">
-                Receita: <MoneyDisplay value={filteredSummary.totalRevenue} size="sm" />
+                Receita: {formatCurrency(filteredSummary.totalRevenue)}
               </Text>
             </View>
 
@@ -264,11 +256,9 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-gray-600 text-sm font-semibold">RECEITA TOTAL</Text>
               </View>
-              <MoneyDisplay 
-                value={filteredSummary.totalRevenue} 
-                size="xl" 
-                color="#3b82f6"
-              />
+              <Text className="text-blue-600 text-4xl font-bold mb-2">
+                {formatCurrency(filteredSummary.totalRevenue)}
+              </Text>
               <Text className="text-gray-500 text-sm">
                 {clients.length} {clients.length === 1 ? "cliente" : "clientes"}
               </Text>
@@ -282,11 +272,9 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-gray-600 text-sm font-semibold">DESPESAS TOTAIS</Text>
               </View>
-              <MoneyDisplay 
-                value={filteredSummary.totalExpenses} 
-                size="xl" 
-                color="#ef4444"
-              />
+              <Text className="text-red-500 text-4xl font-bold mb-2">
+                {formatCurrency(filteredSummary.totalExpenses)}
+              </Text>
               <Text className="text-gray-500 text-sm">
                 Comissões + Despesas
               </Text>
@@ -337,7 +325,7 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Receita Total</Text>
                   </View>
-                  <MoneyDisplay value={filteredSummary.totalRevenue} size="lg" color="#059669" />
+                  <Text className="text-green-600 text-xl font-bold">{formatCurrency(filteredSummary.totalRevenue)}</Text>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
@@ -347,10 +335,7 @@ export default function DashboardScreen() {
                     </View>
                     <Text className="text-gray-700 font-medium">Comissões</Text>
                   </View>
-                  <View className="flex-row items-center">
-                    <Text className="text-orange-600 text-xl font-bold mr-1">-</Text>
-                    <MoneyDisplay value={filteredSummary.totalCommissions} size="lg" color="#f97316" />
-                  </View>
+                  <Text className="text-orange-600 text-xl font-bold">-{formatCurrency(filteredSummary.totalCommissions)}</Text>
                 </View>
 
                 <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
