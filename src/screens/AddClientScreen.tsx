@@ -22,6 +22,14 @@ export default function AddClientScreen() {
   const addClient = useFinancialStore((s) => s.addClient);
   const updateClient = useFinancialStore((s) => s.updateClient);
 
+  // Log para debugging
+  useEffect(() => {
+    console.log("🟢 [AddClientScreen] Componente montado!");
+    console.log("🟢 [AddClientScreen] Platform:", Platform.OS);
+    console.log("🟢 [AddClientScreen] Navigation:", !!navigation);
+    console.log("🟢 [AddClientScreen] Route params:", route.params);
+  }, []);
+
   const editingClient = (route.params as any)?.client as Client | undefined;
   const isEditing = !!editingClient;
 

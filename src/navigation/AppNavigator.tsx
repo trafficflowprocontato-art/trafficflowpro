@@ -154,14 +154,27 @@ export default function AppNavigator() {
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get("type");
         const hash = window.location.hash;
+        const pathname = window.location.pathname;
         
-        console.log("URL params:", { type, hash, fullUrl: window.location.href });
+        console.log("URL params:", { type, hash, pathname, fullUrl: window.location.href });
+        
+        // Limpar URLs indesejadas
+        const invalidPaths = ['subscription-success', 'subscription', 'checkout'];
+        const hasInvalidPath = invalidPaths.some(path => pathname.includes(path));
+        
+        if (hasInvalidPath && !type) {
+          console.log("⚠️ Detected invalid URL, cleaning:", pathname);
+          window.history.replaceState({}, document.title, "/");
+          window.location.href = "/";
+          return;
+        }
         
         // Verificar tanto query params quanto hash para reset
         if (type === "recovery" || hash.includes("type=recovery")) {
           console.log("Password reset detected!");
           setIsPasswordReset(true);
         }
+        
         setIsChecking(false);
       };
       
@@ -173,6 +186,31 @@ export default function AppNavigator() {
   }, []);
 
   console.log("AppNavigator state:", { isAuthenticated, isPasswordReset, isChecking });
+
+  // Configuração de linking para web
+  const linking = {
+    prefixes: [],
+    config: {
+      screens: {
+        Login: 'login',
+        Register: 'register',
+        ForgotPassword: 'forgot-password',
+        ResetPassword: 'reset-password',
+        Main: {
+          path: '',
+          screens: {
+            Dashboard: 'dashboard',
+            Clients: 'clients',
+            Sellers: 'sellers',
+            Expenses: 'expenses',
+            Payments: 'payments',
+            Plans: 'plans',
+          },
+        },
+        AddClient: 'add-client',
+      },
+    },
+  };
 
   // Mostrar loading enquanto verifica
   if (isChecking) {
