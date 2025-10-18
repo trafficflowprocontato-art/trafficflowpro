@@ -10,6 +10,7 @@ import { useAppStore } from "../state/appStore";
 import Sidebar from "../components/Sidebar";
 import DashboardScreen from "../screens/DashboardScreen";
 import ClientsScreen from "../screens/ClientsScreen";
+import GraphicsScreen from "../screens/GraphicsScreen";
 import ExpensesScreen from "../screens/ExpensesScreen";
 import SellersScreen from "../screens/SellersScreen";
 import AddClientScreen from "../screens/AddClientScreen";
@@ -70,11 +71,21 @@ function MobileTabNavigator() {
         }}
       />
       <Tab.Screen
+        name="Graphics"
+        component={GraphicsScreen}
+        options={{
+          tabBarLabel: "Gráficos",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bar-chart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Sellers"
         component={SellersScreen}
         options={{
           tabBarLabel: "Vendedores",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size}) => (
             <Ionicons name="cash" size={size} color={color} />
           ),
         }}
@@ -129,6 +140,7 @@ function DesktopDrawerNavigator() {
     >
       <Drawer.Screen name="Dashboard" component={DashboardScreen} />
       <Drawer.Screen name="Clients" component={ClientsScreen} />
+      <Drawer.Screen name="Graphics" component={GraphicsScreen} />
       <Drawer.Screen name="Sellers" component={SellersScreen} />
       <Drawer.Screen name="Expenses" component={ExpensesScreen} />
       <Drawer.Screen name="Payments" component={PaymentsScreen} />

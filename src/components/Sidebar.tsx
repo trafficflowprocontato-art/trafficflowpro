@@ -46,6 +46,12 @@ export default function Sidebar({ navigation, currentRoute }: SidebarProps) {
       screen: "Clients"
     },
     { 
+      icon: "bar-chart", 
+      label: "Gráficos", 
+      route: "Graphics",
+      screen: "Graphics"
+    },
+    { 
       icon: "cash", 
       label: "Vendedores", 
       route: "Sellers",
