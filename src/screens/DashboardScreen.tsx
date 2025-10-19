@@ -518,9 +518,15 @@ export default function DashboardScreen() {
             <Text className="text-amber-800 text-sm mb-3">
               Seu período de teste de 7 dias terminou. Assine agora para continuar criando e editando seus dados.
             </Text>
-            <Text className="text-amber-700 text-xs font-medium">
+            <Text className="text-amber-700 text-xs font-medium mb-3">
               💎 Você ainda pode visualizar tudo, mas não pode criar, editar ou excluir até assinar.
             </Text>
+            <Pressable 
+              onPress={() => (navigation as any).navigate("Pricing")}
+              className="bg-amber-500 py-3 rounded-xl active:bg-amber-600"
+            >
+              <Text className="text-white font-bold text-center">Ver Planos</Text>
+            </Pressable>
           </View>
         )}
         
@@ -535,9 +541,15 @@ export default function DashboardScreen() {
             <Text className="text-blue-800 text-sm mb-1">
               Você tem <Text className="font-bold">{trialInfo.daysLeft} {trialInfo.daysLeft === 1 ? "dia" : "dias"}</Text> restantes de teste gratuito.
             </Text>
-            <Text className="text-blue-700 text-xs font-medium">
+            <Text className="text-blue-700 text-xs font-medium mb-3">
               💎 Assine agora e não perca o acesso aos seus dados!
             </Text>
+            <Pressable 
+              onPress={() => (navigation as any).navigate("Pricing")}
+              className="bg-blue-500 py-3 rounded-xl active:bg-blue-600"
+            >
+              <Text className="text-white font-bold text-center">Assinar Agora</Text>
+            </Pressable>
           </View>
         )}
         
