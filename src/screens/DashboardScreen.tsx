@@ -199,11 +199,11 @@ export default function DashboardScreen() {
         </View>
 
         {/* Seletor de Mês - Dropdown Desktop */}
-        <View className="bg-white border-b border-gray-100 px-8 py-4">
+        <View className="bg-white border-b border-gray-100 px-8 py-4" style={{ position: 'relative', zIndex: 100 }}>
           <View className="max-w-7xl mx-auto w-full">
             <View className="flex-row items-center gap-3">
               <Text className="text-gray-700 font-semibold">Filtrar por período:</Text>
-              <View className="relative">
+              <View style={{ position: 'relative', zIndex: 100 }}>
                 <Pressable
                   onPress={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex-row items-center gap-2 px-4 py-2 bg-blue-600 rounded-xl border border-blue-700"
@@ -220,8 +220,15 @@ export default function DashboardScreen() {
                 
                 {isDropdownOpen && (
                   <View 
-                    className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 min-w-[240px]"
-                    style={{ zIndex: 9999 }}
+                    className="bg-white rounded-xl shadow-2xl border border-gray-200 min-w-[240px]"
+                    style={{ 
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      marginTop: 8,
+                      zIndex: 9999,
+                      maxHeight: 300
+                    }}
                   >
                     <ScrollView style={{ maxHeight: 300 }}>
                       <Pressable
