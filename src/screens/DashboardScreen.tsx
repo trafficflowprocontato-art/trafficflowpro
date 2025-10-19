@@ -587,9 +587,9 @@ export default function DashboardScreen() {
           <Text className="text-blue-600 text-sm mt-2">
 
         {/* Seletor de Mês Mobile - Dropdown */}
-        <View className="mb-6" style={{ position: 'relative', zIndex: 50 }}>
+        <View className="mb-6" style={{ position: 'relative', zIndex: 100, elevation: 100 }}>
           <Text className="text-gray-700 font-semibold mb-3 text-sm">Filtrar por período:</Text>
-          <View style={{ position: 'relative', zIndex: 50 }}>
+          <View style={{ position: 'relative', zIndex: 100 }}>
             <Pressable
               onPress={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex-row items-center justify-between px-4 py-3 bg-blue-600 rounded-xl border border-blue-700"
@@ -613,8 +613,13 @@ export default function DashboardScreen() {
                   left: 0,
                   right: 0,
                   marginTop: 8,
-                  zIndex: 9999,
-                  maxHeight: 300
+                  zIndex: 99999,
+                  elevation: 99999,
+                  maxHeight: 300,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
                 }}
               >
                 <ScrollView style={{ maxHeight: 300 }}>
