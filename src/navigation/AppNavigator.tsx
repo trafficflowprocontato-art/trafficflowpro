@@ -25,7 +25,33 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Bottom Tabs para Mobile
+// Drawer com Sidebar para Mobile (hamburger menu)
+function MobileDrawerNavigator() {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <Sidebar {...props} currentRoute={props.state.routeNames[props.state.index]} />}
+      screenOptions={{
+        headerShown: false,
+        drawerType: "front", // Overlay em vez de push
+        drawerStyle: {
+          width: 280,
+        },
+        swipeEnabled: true, // Permitir swipe para abrir
+        overlayColor: "rgba(0,0,0,0.5)", // Overlay escuro
+      }}
+    >
+      <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+      <Drawer.Screen name="Clients" component={ClientsScreen} />
+      <Drawer.Screen name="Graphics" component={GraphicsScreen} />
+      <Drawer.Screen name="Sellers" component={SellersScreen} />
+      <Drawer.Screen name="Expenses" component={ExpensesScreen} />
+      <Drawer.Screen name="Payments" component={PaymentsScreen} />
+      <Drawer.Screen name="Pricing" component={PricingScreen} />
+    </Drawer.Navigator>
+  );
+}
+
+// Bottom Tabs para Mobile (DEPRECATED - usando Drawer agora)
 function MobileTabNavigator() {
   const theme = useAppStore((s) => s.theme);
   const isDark = theme === "dark";
@@ -155,8 +181,8 @@ function MainNavigator() {
   const isDesktop = Platform.OS === 'web' && width >= 1024;
   
   // Desktop: Sidebar permanente
-  // Mobile: Bottom Tabs
-  return isDesktop ? <DesktopDrawerNavigator /> : <MobileTabNavigator />;
+  // Mobile: Drawer com hamburger menu
+  return isDesktop ? <DesktopDrawerNavigator /> : <MobileDrawerNavigator />;
 }
 
 function AuthStack() {
