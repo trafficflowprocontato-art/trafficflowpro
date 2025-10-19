@@ -181,8 +181,8 @@ function MainNavigator() {
   const isDesktop = Platform.OS === 'web' && width >= 1024;
   
   // Desktop: Sidebar permanente
-  // Mobile: Drawer com hamburger menu
-  return isDesktop ? <DesktopDrawerNavigator /> : <MobileDrawerNavigator />;
+  // Mobile: Bottom Tabs (mantém navegação embaixo)
+  return isDesktop ? <DesktopDrawerNavigator /> : <MobileTabNavigator />;
 }
 
 function AuthStack() {

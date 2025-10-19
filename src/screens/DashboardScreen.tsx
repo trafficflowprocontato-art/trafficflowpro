@@ -553,17 +553,9 @@ export default function DashboardScreen() {
           </View>
         )}
         
-        {/* Header with User Info, Hamburger and Logout */}
+        {/* Header with User Info and Logout */}
         <View className="mb-8">
           <View className="flex-row justify-between items-start mb-4">
-            {/* Hamburger Menu Button */}
-            <Pressable
-              onPress={() => (navigation as any).openDrawer()}
-              className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center active:bg-blue-200 mr-3"
-            >
-              <Ionicons name="menu" size={24} color="#3b82f6" />
-            </Pressable>
-            
             <View className="flex-1">
               <Text className="text-3xl font-bold text-gray-900 mb-1">
                 TrafficFlow Pro
