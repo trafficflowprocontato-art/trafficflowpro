@@ -409,15 +409,40 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   calculateTrialInfo: () => {
     const { user, subscription } = get();
     
-    // Se tem subscription ativa, tem acesso completo
-    if (subscription && subscription.status === 'active') {
-      const trialInfo: TrialInfo = {
-        daysLeft: 999,
-        isExpired: false,
-        hasFullAccess: true,
-      };
-      set({ trialInfo });
-      return trialInfo;
+    // Se tem subscription ativa OU paga, não mostrar banner de trial
+    if (subscription) {
+      // Se está ativa, tem acesso completo sem mensagem de trial
+      if (subscription.status === 'active') {
+        const trialInfo: TrialInfo = {
+          daysLeft: 999,
+          isExpired: false,
+          hasFullAccess: true,
+        };
+        set({ trialInfo });
+        return trialInfo;
+      }
+      
+      // Se está past_due (pagamento falhou), tem acesso limitado
+      if (subscription.status === 'past_due') {
+        const trialInfo: TrialInfo = {
+          daysLeft: 0,
+          isExpired: true,
+          hasFullAccess: false,
+        };
+        set({ trialInfo });
+        return trialInfo;
+      }
+      
+      // Se está canceled, sem acesso
+      if (subscription.status === 'canceled') {
+        const trialInfo: TrialInfo = {
+          daysLeft: 0,
+          isExpired: true,
+          hasFullAccess: false,
+        };
+        set({ trialInfo });
+        return trialInfo;
+      }
     }
 
     // Se não tem usuário, sem acesso
@@ -431,7 +456,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       return trialInfo;
     }
 
-    // Calcular dias desde registro
+    // Calcular dias desde registro (apenas para usuários sem subscription)
     const createdAt = new Date(user.created_at);
     const now = new Date();
     const daysSinceRegistration = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
