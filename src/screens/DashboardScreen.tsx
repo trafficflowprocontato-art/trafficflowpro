@@ -594,33 +594,68 @@ export default function DashboardScreen() {
           </Text>
           <Text className="text-blue-600 text-sm mt-2">
 
-        {/* Seletor de Mês Mobile */}
-        <View className="mb-6">
+        {/* Seletor de Mês Mobile - Dropdown */}
+        <View className="mb-6" style={{ position: 'relative', zIndex: 50 }}>
           <Text className="text-gray-700 font-semibold mb-3 text-sm">Filtrar por período:</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex-row gap-2">
-              <Pressable
-                onPress={() => setSelectedMonth("total")}
-                className={`px-4 py-3 rounded-xl ${selectedMonth === "total" ? "bg-blue-600" : "bg-white border border-gray-300"}`}
+          <View style={{ position: 'relative', zIndex: 50 }}>
+            <Pressable
+              onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex-row items-center justify-between px-4 py-3 bg-blue-600 rounded-xl border border-blue-700"
+            >
+              <Text className="text-white font-semibold text-sm">
+                {selectedMonth === "total" ? "📊 Total (Tudo)" : availableMonths.find(m => m.key === selectedMonth)?.label || "Selecione"}
+              </Text>
+              <Ionicons 
+                name={isDropdownOpen ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color="white" 
+              />
+            </Pressable>
+            
+            {isDropdownOpen && (
+              <View 
+                className="bg-white rounded-xl shadow-2xl border border-gray-200"
+                style={{ 
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  marginTop: 8,
+                  zIndex: 9999,
+                  maxHeight: 300
+                }}
               >
-                <Text className={`font-semibold text-sm ${selectedMonth === "total" ? "text-white" : "text-gray-700"}`}>
-                  📊 Total
-                </Text>
-              </Pressable>
-              
-              {availableMonths.slice(-6).map(month => (
-                <Pressable
-                  key={month.key}
-                  onPress={() => setSelectedMonth(month.key)}
-                  className={`px-4 py-3 rounded-xl ${selectedMonth === month.key ? "bg-blue-600" : "bg-white border border-gray-300"}`}
-                >
-                  <Text className={`font-semibold text-sm ${selectedMonth === month.key ? "text-white" : "text-gray-700"}`}>
-                    {month.label.split(' ')[0]}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
+                <ScrollView style={{ maxHeight: 300 }}>
+                  <Pressable
+                    onPress={() => {
+                      setSelectedMonth("total");
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`px-4 py-3 border-b border-gray-100 ${selectedMonth === "total" ? "bg-blue-50" : "bg-white"}`}
+                  >
+                    <Text className={`font-semibold ${selectedMonth === "total" ? "text-blue-600" : "text-gray-700"}`}>
+                      📊 Total (Tudo)
+                    </Text>
+                  </Pressable>
+                  
+                  {availableMonths.map(month => (
+                    <Pressable
+                      key={month.key}
+                      onPress={() => {
+                        setSelectedMonth(month.key);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`px-4 py-3 border-b border-gray-100 ${selectedMonth === month.key ? "bg-blue-50" : "bg-white"}`}
+                    >
+                      <Text className={`font-medium ${selectedMonth === month.key ? "text-blue-600" : "text-gray-700"}`}>
+                        {month.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+          </View>
         </View>
             Receita total: {formatCurrency(filteredSummary.totalRevenue)}
           </Text>
