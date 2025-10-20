@@ -45,7 +45,9 @@ export default function SellersScreen() {
     generateCommissionsForMonth(currentMonth);
   }, [currentMonth]);
 
-  const commissionsThisMonth = sellerCommissions.filter((c) => c.month === currentMonth);
+  const commissionsThisMonth = sellerCommissions
+    .filter((c) => c.month === currentMonth)
+    .filter((c) => c.sellerName && c.sellerName.trim() !== "" && c.sellerName !== "Sem vendedor");
 
   const handleTogglePayment = (id: string, currentStatus: "paid" | "pending") => {
     if (isReadOnly) {
